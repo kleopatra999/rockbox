@@ -134,6 +134,21 @@ static bool draw_title(struct screen *display, struct gui_synclist *list)
 #endif
     display->set_viewport(title_text_vp);
     display->puts_scroll_style(0, 0, list->title, style);
+    
+#ifdef HAVE_TOUCHSCREEN
+    /* do the separator before the text (so that the text can overlap)
+     * Thicker line below the title */
+    if (global_settings.list_separator_enabled)
+    {
+        struct viewport vp = *(list->parent[screen]);
+        int height = lcd_get_dpi() > 200 ? 3 : 2;
+        vp.y = title_text_vp->y + title_text_vp->height - height;
+        vp.height = height;
+        display->set_viewport(&vp);
+        display->set_foreground(global_settings.list_separator_color);
+        display->fill_viewport();
+    }
+#endif
     return true;
 }
 
@@ -156,6 +171,12 @@ void list_draw(struct screen *display, struct gui_synclist *list)
     bool show_title;
     struct viewport *list_text_vp = &list_text[screen];
     int indent = 0;
+
+#ifdef HAVE_TOUCHSCREEN
+    /* whether to fill the space to the left of the list items which is
+     * reserved for scrollbar and/or indentation of list items */
+    bool fill_pad = false;
+#endif
 
     line_height = parent->line_height;
     display->set_viewport(parent);
@@ -220,6 +241,9 @@ void list_draw(struct screen *display, struct gui_synclist *list)
         {
             list_text_vp->width -= SCROLLBAR_WIDTH;
             list_text_vp->x += SCROLLBAR_WIDTH;
+#ifdef HAVE_TOUCHSCREEN
+            fill_pad = true;
+#endif
         }
         else if (VP_IS_RTL(list_text_vp) && scrollbar_in_right)
         {
@@ -357,6 +381,29 @@ void list_draw(struct screen *display, struct gui_synclist *list)
                 display->puts_style_xyoffset(0, line, entry_name,
                         style, item_offset, draw_offset);
         }
+#ifdef HAVE_TOUCHSCREEN
+        /* do the line separator*/
+        if (global_settings.list_separator_enabled
+                && !(i % list->selected_size)) /* only for selectable lines */
+        {
+            struct viewport tmp = *list_text_vp;
+            int y = line * line_height - 1;
+            if (icon_count)
+            {
+                if (!VP_IS_RTL(&tmp))
+                    tmp.x = list_icons.x;
+                tmp.width += list_icons.width;
+            }
+            if (fill_pad)
+            {
+                tmp.x -= SCROLLBAR_WIDTH;
+                tmp.width += SCROLLBAR_WIDTH;
+            }
+            display->set_viewport(&tmp);
+            display->set_foreground(global_settings.list_separator_color);
+            display->hline(0, tmp.width, y+draw_offset + line_height*list->selected_size);
+        }
+#endif
         /* do the icon */
         display->set_viewport(&list_icons);
         if (list->callback_get_item_icon != NULL)
