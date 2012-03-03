@@ -385,13 +385,21 @@ static inline unsigned lcd_color_to_native(unsigned color)
 #endif
 /* The actual framebuffer */
 extern fb_data *lcd_framebuffer;
-extern fb_data lcd_static_framebuffer[LCD_FBHEIGHT][LCD_FBWIDTH];
 #if defined(LCD_STRIDEFORMAT) && LCD_STRIDEFORMAT == VERTICAL_STRIDE
 #define FBADDR(x, y) (lcd_framebuffer + ((x) * LCD_FBHEIGHT) + (y))
 #else
 #define FBADDR(x, y) (lcd_framebuffer + ((y) * LCD_FBWIDTH) + (x))
 #endif
+
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+extern fb_data *lcd_framebuffer, *lcd_static_framebuffer;
+extern int lcd_width;
+extern int lcd_height;
+#define FRAMEBUFFER_SIZE (lcd_width*lcd_height*sizeof(fb_data))
+#else
+extern fb_data lcd_static_framebuffer[LCD_FBHEIGHT][LCD_FBWIDTH];
 #define FRAMEBUFFER_SIZE (sizeof(lcd_static_framebuffer))
+#endif
 
 /** Port-specific functions. Enable in port config file. **/
 #ifdef HAVE_REMOTE_LCD_AS_MAIN

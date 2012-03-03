@@ -2,11 +2,12 @@
 /* This is for devices having a keypad, running RockBox as an application */
 #include "SUBDIRS"
 
-#else
+#elif !defined(HAVE_DYNAMIC_LCD_SIZE)
 /* For all targets with a bitmap display and a touchscreen
  * In fact, most of the plugins aren't supposed to be used on a touch(mouse) device
  */
 lua
+
 #ifdef HAVE_LCD_BITMAP
 
 #if CONFIG_CODEC == SWCODEC && PLUGIN_BUFFER_SIZE > 0x20000
@@ -15,7 +16,7 @@ fft
 
 reversi
 
-#ifdef HAVE_TAGCACHE
+#if defined(HAVE_TAGCACHE)
 pictureflow
 #endif
 
@@ -25,7 +26,9 @@ pictureflow
 #if CONFIG_CODEC == SWCODEC
 
 #if MEMORYSIZE > 2 /* we need a lot of RAM for instruments */
+#ifndef HAVE_DYNAMIC_LCD_SIZE
 mikmod
+#endif
 #endif
 
 #endif /* CONFIG_CODEC == SWCODEC */

@@ -456,8 +456,13 @@ static bool dbg_buffering_thread(void)
             screens[i].putsf(0, line++, "alloc: %6ld/%ld", audio_filebufused(),
                             (long) filebuflen);
 
-#if LCD_HEIGHT > 80 || (defined(HAVE_REMOTE_LCD) && LCD_REMOTE_HEIGHT > 80)
-            if (screens[i].lcdheight > 80)
+            if ((LCD_HEIGHT > 80 ||
+#ifdef HAVE_REMOTE_LCD
+                LCD_REMOTE_HEIGHT > 80
+#else
+                0
+#endif
+                ) && screens[i].lcdheight > 80)
             {
                 gui_scrollbar_draw(&screens[i],0, line*8, screens[i].lcdwidth, 6,
                                    filebuflen, 0, audio_filebufused(), HORIZONTAL);
@@ -470,19 +475,22 @@ static bool dbg_buffering_thread(void)
                                    filebuflen, 0, (long)d.buffered_data, HORIZONTAL);
                 line++;
             }
-#endif
 
             screens[i].putsf(0, line++, "usefl: %6ld/%ld", (long)(d.useful_data),
                                                        (long)filebuflen);
 
-#if LCD_HEIGHT > 80 || (defined(HAVE_REMOTE_LCD) && LCD_REMOTE_HEIGHT > 80)
-            if (screens[i].lcdheight > 80)
+            if ((LCD_HEIGHT > 80 ||
+#ifdef HAVE_REMOTE_LCD
+                LCD_REMOTE_HEIGHT > 80
+#else
+                0
+#endif
+                ) && screens[i].lcdheight > 80)
             {
                 gui_scrollbar_draw(&screens[i],0, line*8, screens[i].lcdwidth, 6,
                                    filebuflen, 0, d.useful_data, HORIZONTAL);
                 line++;
             }
-#endif
 
             screens[i].putsf(0, line++, "data_rem: %ld", (long)d.data_rem);
 

@@ -136,7 +136,7 @@ void lcd_update_rect(int x_start, int y_start, int width, int height)
     sdl_update_rect(lcd_surface, x_start, y_start, width, height,
                     LCD_WIDTH, LCD_HEIGHT, get_lcd_pixel);
     sdl_gui_update(lcd_surface, x_start, y_start, width,
-                   height + LCD_SPLIT_LINES, SIM_LCD_WIDTH, SIM_LCD_HEIGHT,
+                   height + LCD_SPLIT_LINES, LCD_WIDTH, LCD_HEIGHT,
                    background ? UI_LCD_POSX : 0, background? UI_LCD_POSY : 0);
 }
 
@@ -164,7 +164,7 @@ void sim_backlight(int value)
 #endif /* LCD_DEPTH */
 
     sdl_gui_update(lcd_surface, 0, 0, SIM_LCD_WIDTH, SIM_LCD_HEIGHT,
-                   SIM_LCD_WIDTH, SIM_LCD_HEIGHT,
+                   LCD_WIDTH, LCD_HEIGHT,
                    background ? UI_LCD_POSX : 0, background? UI_LCD_POSY : 0);
 }
 #endif /* HAVE_BACKLIGHT */
@@ -172,10 +172,14 @@ void sim_backlight(int value)
 /* initialise simulator lcd driver */
 void lcd_init_device(void)
 {
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    lcd_static_framebuffer = malloc(lcd_width * lcd_height * sizeof(fb_data));
+#endif
+
 #if LCD_DEPTH == 16
     lcd_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
-                                       SIM_LCD_WIDTH * display_zoom,
-                                       SIM_LCD_HEIGHT * display_zoom,
+                                       LCD_WIDTH * display_zoom,
+                                       LCD_HEIGHT * display_zoom,
                                        LCD_DEPTH, 0, 0, 0, 0);
 #elif LCD_DEPTH <= 8
     lcd_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
@@ -213,7 +217,7 @@ void sim_lcd_ex_update_rect(int x_start, int y_start, int width, int height)
         sdl_update_rect(lcd_surface, x_start, y_start, width, height,
                         LCD_WIDTH, LCD_HEIGHT, lcd_ex_getpixel);
         sdl_gui_update(lcd_surface, x_start, y_start, width, 
-                       height + LCD_SPLIT_LINES, SIM_LCD_WIDTH, SIM_LCD_HEIGHT,
+                       height + LCD_SPLIT_LINES, LCD_WIDTH, LCD_HEIGHT,
                        background ? UI_LCD_POSX : 0,
                        background ? UI_LCD_POSY : 0);
     }

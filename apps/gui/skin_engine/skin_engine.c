@@ -29,6 +29,7 @@
 #include "settings.h"
 #include "wps.h"
 #include "file.h"
+#include "filefuncs.h"
 #if CONFIG_TUNER
 #include "radio.h"
 #endif
@@ -273,7 +274,15 @@ static char* get_skin_filename(char *buf, size_t buf_size,
     buf[0] = '\0'; /* force it to reload the default */
     if (strcmp(setting, FAILSAFENAME) && strcmp(setting, "-"))
     {
-        snprintf(buf, buf_size, WPS_DIR "/%s.%s", setting, ext);
+        snprintf(buf, buf_size, WPS_DIR "/%s.%s", setting, ext);        
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+        if (!file_exists(buf))
+        {
+            snprintf(buf, sizeof buf, WPS_DIR "/%s.%dx%dx%d.%s",
+                 setting, screens[screen].lcdwidth, 
+                 screens[screen].lcdheight, screens[screen].depth, ext);
+        }
+#endif
     }
     return buf;
 }

@@ -167,19 +167,24 @@ int main(void)
     FOR_NB_SCREENS(i)
     {
         screens[i].clear_display();
+        screens[i].puts(0,0,"Hello");
         screens[i].update();
     }
+    screens[0].puts(0,1,"list_init"); screens[0].update();
 #ifdef HAVE_LCD_BITMAP
     list_init();
 #endif
+    screens[0].puts(0,2,"tree");screens[0].update();
     tree_gui_init();
     /* Keep the order of this 3
      * Must be done before any code uses the multi-screen API */
+    screens[0].puts(0,3,"usb");screens[0].update();
 #ifdef HAVE_USBSTACK
     /* All threads should be created and public queues registered by now */
     usb_start_monitoring();
 #endif
 
+    screens[0].puts(0,4,"rock");screens[0].update();
 #ifdef AUTOROCK
     {
         char filename[MAX_PATH];
@@ -201,6 +206,7 @@ int main(void)
     /* no calls INIT_ATTR functions after this point anymore!
      * see definition of INIT_ATTR in config.h */
     CHART(">root_menu");
+    screens[0].puts(0,5,"menu");screens[0].update();
     root_menu();
 }
 
@@ -359,6 +365,9 @@ static void init(void)
     FOR_NB_SCREENS(i)
         global_status.font_id[i] = FONT_SYSFIXED;
     font_init();
+#endif
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    screen_init();
 #endif
     show_logo();
     button_init();

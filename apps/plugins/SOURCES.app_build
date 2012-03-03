@@ -3,9 +3,11 @@
 #include "SOURCES"
 #else
 /* plugins common to all models */
+#ifndef HAVE_DYNAMIC_LCD_SIZE
 chopper.c
 clix.c
 credits.c
+#endif
 properties.c
 random_folder_advance_config.c
 search.c

@@ -259,7 +259,7 @@ void xlcd_scroll_left(int count)
     fb_data *data, *data_end;
     int length, oldmode;
 
-    if ((unsigned)count >= LCD_WIDTH)
+    if (count >= LCD_WIDTH)
     {
         rb->lcd_clear_display();
         return;
@@ -288,7 +288,7 @@ void xlcd_scroll_right(int count)
     fb_data *data, *data_end;
     int length, oldmode;
 
-    if ((unsigned)count >= LCD_WIDTH)
+    if (count >= LCD_WIDTH)
     {
         rb->lcd_clear_display();
         return;
@@ -320,7 +320,7 @@ void xlcd_scroll_up(int count)
 {
     int length, oldmode;
 
-    if ((unsigned)count >= LCD_HEIGHT)
+    if (count >= LCD_HEIGHT)
     {
         rb->lcd_clear_display();
         return;
@@ -343,7 +343,7 @@ void xlcd_scroll_down(int count)
 {
     int length, oldmode;
 
-    if ((unsigned)count >= LCD_HEIGHT)
+    if (count >= LCD_HEIGHT)
     {
         rb->lcd_clear_display();
         return;

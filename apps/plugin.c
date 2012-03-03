@@ -129,7 +129,7 @@ static int close_wrapper(int fd);
 static int creat_wrapper(const char *pathname, mode_t mode);
 #endif
 
-static const struct plugin_api rockbox_api = {
+static struct plugin_api rockbox_api = {
 
     /* lcd */
 #ifdef HAVE_LCD_CONTRAST
@@ -154,7 +154,11 @@ static const struct plugin_api rockbox_api = {
     lcd_icon,
     lcd_double_height,
 #else
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    NULL, /* will get filled in later */
+#else
     &lcd_static_framebuffer[0][0],
+#endif
     lcd_set_viewport,
     lcd_set_framebuffer,
     lcd_bmp_part,
@@ -851,6 +855,9 @@ int plugin_load(const char* plugin, const void* parameter)
     plugin_size = hdr->end_addr - pluginbuf;
 #else
     plugin_size = 0;
+#endif
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    rockbox_api.lcd_framebuffer = lcd_framebuffer;
 #endif
 
     *(p_hdr->api) = &rockbox_api;

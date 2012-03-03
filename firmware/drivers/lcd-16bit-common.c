@@ -35,10 +35,13 @@ enum fill_opt {
 };
 
 /*** globals ***/
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+fb_data *lcd_framebuffer, *lcd_static_framebuffer;
+#else
 fb_data lcd_static_framebuffer[LCD_FBHEIGHT][LCD_FBWIDTH]
     IRAM_LCDFRAMEBUFFER CACHEALIGN_AT_LEAST_ATTR(16);
 fb_data *lcd_framebuffer = &lcd_static_framebuffer[0][0];
-
+#endif
 static fb_data* lcd_backdrop = NULL;
 static long lcd_backdrop_offset IDATA_ATTR = 0;
 
@@ -46,8 +49,8 @@ static struct viewport default_vp =
 {
     .x        = 0,
     .y        = 0,
-    .width    = LCD_WIDTH,
-    .height   = LCD_HEIGHT,
+    .width    = -1,
+    .height   = -1,
     .font     = FONT_SYSFIXED,
     .drawmode = DRMODE_SOLID,
     .fg_pattern = LCD_DEFAULT_FG,
@@ -59,10 +62,14 @@ static struct viewport* current_vp IDATA_ATTR = &default_vp;
 /* LCD init */
 void lcd_init(void)
 {
-    lcd_clear_display();
-
     /* Call device specific init */
     lcd_init_device();
+
+    lcd_framebuffer = (fb_data*)lcd_static_framebuffer;
+    default_vp.width = LCD_WIDTH;
+    default_vp.height = LCD_HEIGHT;
+
+    lcd_clear_display();
     scroll_init();
 }
 

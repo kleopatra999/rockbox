@@ -180,4 +180,6 @@ void screen_clear_area(struct screen * display, int xstart, int ystart,
  */
 extern struct screen screens[NB_SCREENS];
 
+void screen_init(void) INIT_ATTR;
+
 #endif /*_SCREEN_ACCESS_H_*/

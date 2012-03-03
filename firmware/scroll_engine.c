@@ -198,5 +198,19 @@ void scroll_init(void)
                   sizeof(scroll_stack), 0, scroll_name
                   IF_PRIO(, PRIORITY_USER_INTERFACE)
                   IF_COP(, CPU));
+
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    lcd_scroll =
+        malloc(sizeof(struct scrollinfo) * LCD_SCROLLABLE_LINES);
+#ifdef HAVE_REMOTE_LCD
+    lcd_remote_scroll =
+        malloc(sizeof(struct scrollinfo) * LCD_REMOTE_SCROLLABLE_LINES);
+#endif /* HAVE_REMOTE_LCD */
+#endif /* HAVE_DYNAMIC_LCD_SIZE */
+
+    lcd_scroll_info.scroll = lcd_scroll;
+#ifdef HAVE_REMOTE_LCD
+    lcd_remote_scroll_info.scroll = lcd_remote_scroll;
+#endif
 }
 

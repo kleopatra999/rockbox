@@ -53,7 +53,9 @@ extern void lcd_remote_scroll_stop_viewport_rect(const struct viewport *vp, int 
  * larger than the normal linebuffer since it holds the line a second
  * time (+3 spaces) for non-bidir scrolling */
 #define SCROLL_SPACING   3
-#ifdef HAVE_LCD_BITMAP
+#if defined(HAVE_DYNAMIC_LCD_SIZE)
+#define SCROLL_LINE_SIZE (MAX_PATH * 2 + SCROLL_SPACING + 2)
+#elif defined(HAVE_LCD_BITMAP)
 #define SCROLL_LINE_SIZE (MAX_PATH + SCROLL_SPACING + 3*LCD_WIDTH/2 + 2)
 #else
 #define SCROLL_LINE_SIZE (MAX_PATH + SCROLL_SPACING + 3*LCD_WIDTH + 2)
@@ -81,7 +83,7 @@ struct scrollinfo
 
 struct scroll_screen_info
 {
-    struct scrollinfo * const scroll;
+    struct scrollinfo * scroll;
     const int num_scroll; /* number of scrollable lines (also number of scroll structs) */
     int lines;  /* Number of currently scrolling lines */
     long ticks; /* # of ticks between updates*/
@@ -100,7 +102,9 @@ struct scroll_screen_info
 };
 
 /** main lcd **/
-#ifdef HAVE_LCD_BITMAP
+#if defined(HAVE_DYNAMIC_LCD_SIZE)
+#define LCD_SCROLLABLE_LINES 32
+#elif defined(HAVE_LCD_BITMAP)
 #define LCD_SCROLLABLE_LINES ((LCD_HEIGHT+4)/5 < 32 ? (LCD_HEIGHT+4)/5 : 32)
 #else
 #define LCD_SCROLLABLE_LINES LCD_HEIGHT * 2

@@ -30,11 +30,14 @@
 #define MAIN_LCD
 #endif
 
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+static struct scrollinfo *LCDFN(scroll);
+#else
 static struct scrollinfo LCDFN(scroll)[LCD_SCROLLABLE_LINES];
+#endif
 
 struct scroll_screen_info LCDFN(scroll_info) =
 {
-    .scroll       = LCDFN(scroll),
     .lines        = 0,
     .ticks        = 12,
     .delay        = HZ/2,

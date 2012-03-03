@@ -30,6 +30,7 @@
 
 extern JNIEnv *env_ptr;
 extern jobject RockboxService_instance;
+extern jclass  RockboxService_class;
 
 static jobject RockboxFramebuffer_instance;
 static jmethodID java_lcd_update;
@@ -88,6 +89,16 @@ static void connect_with_java(JNIEnv* env, jobject fb_instance)
  */
 void lcd_init_device(void)
 {
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    jmethodID getResolution = (*env_ptr)->GetMethodID(env_ptr, RockboxService_class, "getResolution", "()[I");
+    jintArray resolution = (jintArray) (*env_ptr)->CallObjectMethod(env_ptr, RockboxService_instance, getResolution);
+    jint *resolutionElements = (*env_ptr)->GetIntArrayElements(env_ptr, resolution, NULL);
+
+    lcd_width = resolutionElements[0];
+    lcd_height = resolutionElements[1];
+    (*env_ptr)->ReleaseIntArrayElements(env_ptr, resolution, resolutionElements, 0);
+    lcd_static_framebuffer = malloc(sizeof(fb_data) * lcd_width * lcd_height);
+#endif
 }
 
 void lcd_update(void)

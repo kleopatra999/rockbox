@@ -371,10 +371,8 @@ int kbd_input(char* text, int buflen)
             const unsigned char *p;
             int len = 0;
 
-#if LCD_WIDTH >= 160 && LCD_HEIGHT >= 96
-            struct screen *sc = &screens[l];
-
-            if (sc->getwidth() >= 160 && sc->getheight() >= 96)
+            if (LCD_WIDTH >= 160 && LCD_HEIGHT >= 96 &&
+                screens[l].getwidth() >= 160 && screens[l].getheight() >= 96)
             {
                 p = "ABCDEFG abcdefg !?\" @#$%+'\n"
                     "HIJKLMN hijklmn 789 &_()-`\n"
@@ -389,7 +387,6 @@ int kbd_input(char* text, int buflen)
                 pm->max_line_len = 26;
             }
             else
-#endif /* LCD_WIDTH >= 160 && LCD_HEIGHT >= 96 */
             {
                 p = "ABCDEFG !?\" @#$%+'\n"
                     "HIJKLMN 789 &_()-`\n"

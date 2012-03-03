@@ -40,12 +40,18 @@
 #define MAIN_LCD
 #endif
 
+
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+int lcd_width;
+int lcd_height;
+#endif
+
 void LCDFN(set_framebuffer)(FBFN(data) *fb)
 {
     if (fb)
         LCDFN(framebuffer) = fb;
     else
-        LCDFN(framebuffer) = &LCDFN(static_framebuffer)[0][0];
+        LCDFN(framebuffer) = (fb_data*)LCDFN(static_framebuffer);
 }
 
 /*
