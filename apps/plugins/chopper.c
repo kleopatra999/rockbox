@@ -212,21 +212,13 @@ CONFIG_KEYPAD == MROBE500_PAD
 #define LEVEL_MODE_NORMAL 0
 #define LEVEL_MODE_STEEP 1
 
-#if LCD_HEIGHT <= 64
-#define CYCLES 100
 static inline int SCALE(int x)
 {
-    return x == 1 ? x : x >> 1;
+    return (x == 1 || (rb->screens[0]->lcdheight > 64)) ? x : x >> 1;
 }
-#define SIZE 2
-#else
-#define CYCLES 60
-#define SCALE(x) (x)
-#define SIZE 1
-#endif
 
-/* in 10 milisecond (ticks) */
-#define CYCLETIME ((CYCLES*HZ)/1000)
+
+static int CYCLES, SIZE, CYCLETIME;
 
 /*Chopper's local variables to track the terrain position etc*/
 static int chopCounter;
@@ -671,6 +663,7 @@ static void chopDrawScene(void)
 {
     char s[30];
     int w;
+    struct screen *display = rb->screens[0];
 #if LCD_DEPTH > 2
     rb->lcd_set_background(LCD_BLACK);
 #elif LCD_DEPTH == 2
@@ -694,24 +687,24 @@ static void chopDrawScene(void)
     rb->lcd_set_foreground(LCD_WHITE);
 #endif
     
-#if LCD_WIDTH <= 128
-    rb->snprintf(s, sizeof(s), "Dist: %d", score);
-#else
-    rb->snprintf(s, sizeof(s), "Distance: %d", score);
-#endif
+    if (display->lcdwidth <= 128)
+        rb->snprintf(s, sizeof(s), "Dist: %d", score);
+    else
+        rb->snprintf(s, sizeof(s), "Distance: %d", score);
+
     rb->lcd_getstringsize(s, &w, NULL);
     rb->lcd_putsxy(2, 2, s);
     if (score < highscore)
     {
         int w2;
-#if LCD_WIDTH <= 128
-        rb->snprintf(s, sizeof(s), "Hi: %d", highscore);
-#else
-        rb->snprintf(s, sizeof(s), "Best: %d", highscore);
-#endif
+        if (display->lcdwidth <= 128)
+            rb->snprintf(s, sizeof(s), "Hi: %d", highscore);
+        else
+            rb->snprintf(s, sizeof(s), "Best: %d", highscore);
+            
         rb->lcd_getstringsize(s, &w2, NULL);
-        if (LCD_WIDTH - 2 - w2 > w + 2)
-            rb->lcd_putsxy(LCD_WIDTH - 2 - w2, 2, s);
+        if (display->lcdwidth - 2 - w2 > w + 2)
+            rb->lcd_putsxy(display->lcdwidth - 2 - w2, 2, s);
     }
     rb->lcd_set_drawmode(DRMODE_SOLID);
 
@@ -982,7 +975,7 @@ static void chopRenderTerrain(struct CTerrain *ter, bool isground)
         if (isground)
         {
             y = ay;
-            y2 = (LCD_HEIGHT*SIZE);
+            y2 = (rb->screens[0]->lcdheight * SIZE);
         }
         else
         {
@@ -1004,8 +997,8 @@ static void chopper_load(bool newgame)
     int g;
 
     if (newgame) {
-        iScreenX = LCD_WIDTH * SIZE;
-        iScreenY = LCD_HEIGHT * SIZE;
+        iScreenX = rb->screens[0]->lcdwidth * SIZE;
+        iScreenY = rb->screens[0]->lcdheight * SIZE;
         blockh = iScreenY / 5;
         blockw = iScreenX / 20;
         iPlayerAlive = 1;
@@ -1057,6 +1050,19 @@ enum plugin_status plugin_start(const void* parameter)
     rb->lcd_set_background(LCD_BLACK);
     rb->lcd_set_foreground(LCD_WHITE);
 #endif
+
+    /* adapt to target. slower for "large" screens */
+    if (rb->screens[0]->lcdheight > 64)
+    {
+        CYCLES = 60;
+        SIZE = 1;
+    }
+    else
+    {
+        CYCLES = 100;
+        SIZE = 2;
+    }
+    CYCLETIME = ((CYCLES*HZ)/1000);
 
     /* Turn off backlight timeout */
     backlight_ignore_timeout();

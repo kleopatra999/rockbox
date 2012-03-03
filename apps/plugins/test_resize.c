@@ -48,8 +48,8 @@ const struct button_mapping *plugin_contexts[]
 #define BUTTON_QUIT             PLA_EXIT
 #define CHANGE_MODE             PLA_SELECT
 
-#define MAX_OUTPUT_WIDTH    LCD_WIDTH
-#define MAX_OUTPUT_HEIGHT   LCD_HEIGHT
+#define MAX_OUTPUT_WIDTH    LCD_MAX_WIDTH
+#define MAX_OUTPUT_HEIGHT   LCD_MAX_HEIGHT
 
 static fb_data *b;
 

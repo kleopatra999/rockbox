@@ -125,17 +125,17 @@ static void time_main_update(void)
 
 #if defined(HAVE_LCD_COLOR) && (MEMORYSIZE > 2)
 
-#if LCD_WIDTH >= LCD_HEIGHT
-#define YUV_WIDTH LCD_WIDTH
-#define YUV_HEIGHT LCD_HEIGHT
+#if LCD_MAX_WIDTH >= LCD_MAX_HEIGHT
+#define YUV_MAX_WIDTH LCD_MAX_WIDTH
+#define YUV_MAX_HEIGHT LCD_MAX_HEIGHT
 #else /* Assume the screen is rotated on portrait LCDs */
-#define YUV_WIDTH LCD_HEIGHT
-#define YUV_HEIGHT LCD_WIDTH
+#define YUV_MAX_WIDTH LCD_MAX_HEIGHT
+#define YUV_MAX_HEIGHT LCD_MAX_WIDTH
 #endif
 
-static unsigned char ydata[YUV_HEIGHT][YUV_WIDTH];
-static unsigned char udata[YUV_HEIGHT/2][YUV_WIDTH/2];
-static unsigned char vdata[YUV_HEIGHT/2][YUV_WIDTH/2];
+static unsigned char ydata[YUV_MAX_HEIGHT][YUV_MAX_WIDTH];
+static unsigned char udata[YUV_MAX_HEIGHT/2][YUV_MAX_WIDTH/2];
+static unsigned char vdata[YUV_MAX_HEIGHT/2][YUV_MAX_WIDTH/2];
 
 static unsigned char * const yuvbuf[3] = {
     (void*)ydata,
@@ -143,9 +143,9 @@ static unsigned char * const yuvbuf[3] = {
     (void*)vdata
 };
 
-static void make_gradient_rect(int width, int height)
+void make_gradient_rect(int width, int height)
 {
-    unsigned char vline[YUV_WIDTH/2];
+    unsigned char vline[width/2];
     int x, y;
 
     width /= 2;
@@ -160,7 +160,7 @@ static void make_gradient_rect(int width, int height)
     }
 }
 
-static void time_main_yuv(void)
+void time_main_yuv(void)
 {
     char str[32];     /* text buffer */
     long time_start;  /* start tickcount */
@@ -168,25 +168,38 @@ static void time_main_yuv(void)
     int frame_count;
     int fps;
 
-    const int part14_x = YUV_WIDTH/4;   /* x-offset for 1/4 update test */
-    const int part14_w = YUV_WIDTH/2;   /* x-size for 1/4 update test */
-    const int part14_y = YUV_HEIGHT/4;  /* y-offset for 1/4 update test */
-    const int part14_h = YUV_HEIGHT/2;  /* y-size for 1/4 update test */
+    int width, height;
+
+    if (LCD_WIDTH >= LCD_HEIGHT)
+    {
+        width = LCD_WIDTH;
+        height = LCD_HEIGHT;
+    }
+    else
+    {
+        width = LCD_HEIGHT;
+        height = LCD_WIDTH;
+    }
+
+    const int part14_x = width/4;   /* x-offset for 1/4 update test */
+    const int part14_w = width/2;   /* x-size for 1/4 update test */
+    const int part14_y = height/4;  /* y-offset for 1/4 update test */
+    const int part14_h = height/2;  /* y-size for 1/4 update test */
     
     log_text("Main LCD YUV");
 
     rb->memset(ydata, 128, sizeof(ydata)); /* medium grey */
 
     /* Test 1: full LCD update */
-    make_gradient_rect(YUV_WIDTH, YUV_HEIGHT);
+    make_gradient_rect(width, height);
 
     frame_count = 0;
     rb->sleep(0); /* sync to tick */
     time_start = *rb->current_tick;
     while((time_end = *rb->current_tick) - time_start < DURATION)
     {
-        rb->lcd_blit_yuv(yuvbuf, 0, 0, YUV_WIDTH,
-                         0, 0, YUV_WIDTH, YUV_HEIGHT);
+        rb->lcd_blit_yuv(yuvbuf, 0, 0, YUV_MAX_WIDTH,
+                         0, 0, width, height);
         frame_count++;
     }
     fps = calc_tenth_fps(frame_count, time_end - time_start);
@@ -194,14 +207,14 @@ static void time_main_yuv(void)
     log_text(str);
 
     /* Test 2: quarter LCD update */
-    make_gradient_rect(YUV_WIDTH/2, YUV_HEIGHT/2);
+    make_gradient_rect(width/2, height/2);
 
     frame_count = 0;
     rb->sleep(0); /* sync to tick */
     time_start = *rb->current_tick;
     while((time_end = *rb->current_tick) - time_start < DURATION)
     {
-        rb->lcd_blit_yuv(yuvbuf, 0, 0, YUV_WIDTH,
+        rb->lcd_blit_yuv(yuvbuf, 0, 0, YUV_MAX_WIDTH,
                          part14_x, part14_y, part14_w, part14_h);
         frame_count++;
     }

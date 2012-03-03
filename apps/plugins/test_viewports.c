@@ -37,10 +37,6 @@
 
 static struct viewport vp0 =
 {
-    .x        = 0,
-    .y        = 0,
-    .width    = LCD_WIDTH,
-    .height   = 20,
     .font     = FONT_UI,
     .drawmode = DRMODE_SOLID,
 #if LCD_DEPTH > 1
@@ -51,10 +47,6 @@ static struct viewport vp0 =
 
 static struct viewport vp1 =
 {
-    .x        = LCD_WIDTH / 10,
-    .y        = 20,
-    .width    = LCD_WIDTH / 3,
-    .height   = LCD_HEIGHT / 2,
     .font     = FONT_SYSFIXED,
     .drawmode = DRMODE_SOLID,
 #if LCD_DEPTH > 1
@@ -65,10 +57,6 @@ static struct viewport vp1 =
 
 static struct viewport vp2 =
 {
-    .x        = LCD_WIDTH / 2,
-    .y        = 40,
-    .width    = LCD_WIDTH / 3,
-    .height   = (LCD_HEIGHT / 2),
     .font     = FONT_UI,
     .drawmode = DRMODE_SOLID,
 #if LCD_DEPTH > 1
@@ -80,10 +68,6 @@ static struct viewport vp2 =
 
 static struct viewport vp3 =
 {
-    .x        = LCD_WIDTH / 4,
-    .y        = (5 * LCD_HEIGHT) / 8,
-    .width    = LCD_WIDTH / 2,
-    .height   = (LCD_HEIGHT / 4),
     .font     = FONT_SYSFIXED,
     .drawmode = DRMODE_SOLID,
 #if LCD_DEPTH > 1
@@ -96,10 +80,6 @@ static struct viewport vp3 =
 #ifdef HAVE_REMOTE_LCD
 static struct viewport rvp0 =
 {
-    .x        = 0,
-    .y        = 10,
-    .width    = LCD_REMOTE_WIDTH / 3,
-    .height   = LCD_REMOTE_HEIGHT - 10,
     .font     = FONT_SYSFIXED,
     .drawmode = DRMODE_SOLID,
 #if LCD_REMOTE_DEPTH > 1
@@ -110,10 +90,6 @@ static struct viewport rvp0 =
 
 static struct viewport rvp1 =
 {
-    .x        = LCD_REMOTE_WIDTH / 2,
-    .y        = 0,
-    .width    = LCD_REMOTE_WIDTH / 3,
-    .height   = LCD_REMOTE_HEIGHT - 10,
     .font     = FONT_SYSFIXED,
     .drawmode = DRMODE_SOLID,
 #if LCD_REMOTE_DEPTH > 1
@@ -124,12 +100,48 @@ static struct viewport rvp1 =
 
 #endif
 
+void init_viewports(void)
+{
+    vp0.x        = 0;
+    vp0.y        = 0;
+    vp0.width    = rb->screens[SCREEN_MAIN]->lcdwidth;
+    vp0.height   = 20;
+
+    vp1.x        = rb->screens[SCREEN_MAIN]->lcdwidth / 10;
+    vp1.y        = 20;
+    vp1.width    = rb->screens[SCREEN_MAIN]->lcdwidth / 3;
+    vp1.height   = rb->screens[SCREEN_MAIN]->lcdheight / 2;
+
+    vp2.x        = rb->screens[SCREEN_MAIN]->lcdwidth / 2;
+    vp2.y        = 40;
+    vp2.width    = rb->screens[SCREEN_MAIN]->lcdwidth / 3;
+    vp2.height   = rb->screens[SCREEN_MAIN]->lcdheight / 2;
+
+    vp3.x        = rb->screens[SCREEN_MAIN]->lcdwidth / 4;
+    vp3.y        = (5 * rb->screens[SCREEN_MAIN]->lcdheight) / 8;
+    vp3.width    = rb->screens[SCREEN_MAIN]->lcdwidth / 2;
+    vp3.height   = rb->screens[SCREEN_MAIN]->lcdheight / 4;
+
+#ifdef HAVE_REMOTE_LCD
+    rvp0.x        = 0;
+    rvp0.y        = 10;
+    rvp0.width    = rb->screens[SCREEN_REMOTE]->lcdwidth / 3;
+    rvp0.height   = rb->screens[SCREEN_REMOTE]->lcdheight - 10;
+    
+    rvp1.x        = rb->screens[SCREEN_REMOTE]->lcdwidth / 2;
+    rvp1.y        = 0;
+    rvp1.width    = rb->screens[SCREEN_REMOTE]->lcdwidth / 3;
+    rvp1.height   = rb->screens[SCREEN_REMOTE]->lcdheight - 10;
+#endif
+}
 
 enum plugin_status plugin_start(const void* parameter)
 {
     (void)parameter;
     char buf[80];
     int i,y;
+
+    init_viewports();
 
     rb->screens[SCREEN_MAIN]->set_viewport(&vp0);
     rb->screens[SCREEN_MAIN]->clear_viewport();

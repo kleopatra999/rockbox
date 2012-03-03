@@ -723,8 +723,11 @@ Lyre prototype 1 */
 #ifdef DEFAULT_LCD_WIDTH
 #define LCD_WIDTH DEFAULT_LCD_WIDTH
 #endif
-#ifndef MAX_LCD_WIDTH
-#define MAX_LCD_WIDTH LCD_WIDTH
+#ifndef LCD_MAX_WIDTH
+#define LCD_MAX_WIDTH LCD_WIDTH
+#endif
+#ifndef LCD_MAX_HEIGHT
+#define LCD_MAX_HEIGHT LCD_HEIGHT
 #endif
 #endif /* HAVE_DYNAMIC_LCD_SIZE */
 

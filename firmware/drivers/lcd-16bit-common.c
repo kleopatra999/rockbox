@@ -1165,13 +1165,13 @@ void lcd_blit_yuv(unsigned char * const src[3],
     width &= ~1;
     linecounter = height >> 1;
 
-#if LCD_WIDTH >= LCD_HEIGHT
-    dst     = FBADDR(x, y);
-    row_end = dst + width;
-#else
-    dst     = FBADDR(LCD_WIDTH - y - 1, x);
-    row_end = dst + LCD_WIDTH * width;
-#endif
+    if (LCD_WIDTH >= LCD_HEIGHT) {
+        dst     = FBADDR(x, y);
+        row_end = dst + width;
+    } else {
+        dst     = FBADDR(LCD_WIDTH - y - 1, x);
+        row_end = dst + LCD_WIDTH * width;
+    }
 
     z    = stride * src_y;
     ysrc = src[0] + z + src_x;
@@ -1210,11 +1210,10 @@ void lcd_blit_yuv(unsigned char * const src[3],
 
             *dst = LCD_RGBPACK_LCD(r >> 9, g >> 8, b >> 9);
 
-#if LCD_WIDTH >= LCD_HEIGHT
-            dst++;
-#else
-            dst += LCD_WIDTH;
-#endif
+            if (LCD_WIDTH >= LCD_HEIGHT)
+                dst++;
+            else
+                dst += LCD_WIDTH;
 
             y = YFAC*(*ysrc++ - 16);
             r = y + rv;
@@ -1230,11 +1229,10 @@ void lcd_blit_yuv(unsigned char * const src[3],
 
             *dst = LCD_RGBPACK_LCD(r >> 9, g >> 8, b >> 9);
 
-#if LCD_WIDTH >= LCD_HEIGHT
-            dst++;
-#else
-            dst += LCD_WIDTH;
-#endif
+            if (LCD_WIDTH >= LCD_HEIGHT)
+                dst++;
+            else
+                dst += LCD_WIDTH;
         }
         while (dst < row_end);
 
@@ -1242,13 +1240,13 @@ void lcd_blit_yuv(unsigned char * const src[3],
         usrc    -= width >> 1;
         vsrc    -= width >> 1;
 
-#if LCD_WIDTH >= LCD_HEIGHT
-        row_end += LCD_WIDTH;
-        dst     += LCD_WIDTH - width;
-#else
-        row_end -= 1;
-        dst     -= LCD_WIDTH*width + 1;
-#endif
+        if (LCD_WIDTH >= LCD_HEIGHT) {
+            row_end += LCD_WIDTH;
+            dst     += LCD_WIDTH - width;
+        } else {
+            row_end -= 1;
+            dst     -= LCD_WIDTH*width + 1;
+        }
 
         do
         {
@@ -1275,11 +1273,10 @@ void lcd_blit_yuv(unsigned char * const src[3],
 
             *dst = LCD_RGBPACK_LCD(r >> 9, g >> 8, b >> 9);
 
-#if LCD_WIDTH >= LCD_HEIGHT
+        if (LCD_WIDTH >= LCD_HEIGHT)
             dst++;
-#else
+        else
             dst += LCD_WIDTH;
-#endif
 
             y = YFAC*(*ysrc++ - 16);
             r = y + rv;
@@ -1295,11 +1292,10 @@ void lcd_blit_yuv(unsigned char * const src[3],
 
             *dst = LCD_RGBPACK_LCD(r >> 9, g >> 8, b >> 9);
 
-#if LCD_WIDTH >= LCD_HEIGHT
-            dst++;
-#else
-            dst += LCD_WIDTH;
-#endif
+            if (LCD_WIDTH >= LCD_HEIGHT)
+                dst++;
+            else
+                dst += LCD_WIDTH;
         }
         while (dst < row_end);
 
@@ -1307,21 +1303,20 @@ void lcd_blit_yuv(unsigned char * const src[3],
         usrc    += stride >> 1;
         vsrc    += stride >> 1;
 
-#if LCD_WIDTH >= LCD_HEIGHT
-        row_end += LCD_WIDTH;
-        dst     += LCD_WIDTH - width;
-#else
-        row_end -= 1;
-        dst     -= LCD_WIDTH*width + 1;
-#endif
+        if (LCD_WIDTH >= LCD_HEIGHT) {
+            row_end += LCD_WIDTH;
+            dst     += LCD_WIDTH - width;
+        } else {
+            row_end -= 1;
+            dst     -= LCD_WIDTH*width + 1;
+        }
     }
     while (--linecounter > 0);
 
-#if LCD_WIDTH >= LCD_HEIGHT
-    lcd_update_rect(x, y, width, height);
-#else
-    lcd_update_rect(LCD_WIDTH - y - height, x, height, width);
-#endif
+    if (LCD_WIDTH >= LCD_HEIGHT)
+        lcd_update_rect(x, y, width, height);
+    else
+        lcd_update_rect(LCD_WIDTH - y - height, x, height, width);
 }
 
 /* Fill a rectangle with a gradient. This function draws only the partial

@@ -38,7 +38,9 @@
  * overriden by configure for application builds */
 
 #define HAVE_DYNAMIC_LCD_SIZE
-#define MAX_LCD_WIDTH 1024
+/* worst case enough for 1080p */
+#define LCD_MAX_WIDTH  2048
+#define LCD_MAX_HEIGHT 2048
 
 #define LCD_DEPTH  16
 #define LCD_PIXELFORMAT RGB565

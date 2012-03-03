@@ -152,6 +152,13 @@ void* plugin_get_buffer(size_t *buffer_size);
 #define LOGF(...)
 #endif
 
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+#undef LCD_WIDTH
+#define LCD_WIDTH rb->screens[0]->lcdwidth
+#undef LCD_HEIGHT
+#define LCD_HEIGHT rb->screens[0]->lcdheight
+#endif
+
 #endif
 
 #define PLUGIN_MAGIC 0x526F634B /* RocK */
