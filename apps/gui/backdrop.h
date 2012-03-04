@@ -27,8 +27,12 @@
 #include "lcd.h"
 #include "bmp.h"
 
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+#define LCD_BACKDROP_BYTES (LCD_MAX_WIDTH*LCD_MAX_HEIGHT*sizeof(fb_data))
+#else
 #define LCD_BACKDROP_BYTES (LCD_FBHEIGHT*LCD_FBWIDTH*sizeof(fb_data))
-bool backdrop_load(const char *filename, char* backdrop_buffer);
+#endif
+int backdrop_load(const char *filename, char* backdrop_buffer);
 void backdrop_show(char* backdrop_buffer);
 
 #else
@@ -36,7 +40,7 @@ void backdrop_show(char* backdrop_buffer);
 #endif
 
 #if defined(HAVE_REMOTE_LCD) 
-bool remote_backdrop_load(const char *filename, char* backdrop_buffer);
+int remote_backdrop_load(const char *filename, char* backdrop_buffer);
 void remote_backdrop_show(char* backdrop_buffer);
 
 #if LCD_DEPTH > 1 && LCD_REMOTE_DEPTH > 1 && !defined(__PCTOOL__)

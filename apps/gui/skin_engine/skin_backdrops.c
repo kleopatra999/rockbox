@@ -197,8 +197,9 @@ bool skin_backdrops_preload(void)
                     handle_being_loaded = backdrops[i].buflib_handle;
                     if (strcmp(filename, BACKDROP_BUFFERNAME))
                     {
-                        backdrops[i].loaded =
-                                screens[screen].backdrop_load(filename, backdrops[i].buffer);
+                        int size =  screens[screen].backdrop_load(filename,
+                                                            backdrops[i].buffer);
+                        backdrops[i].loaded = size > 0;
                         handle_being_loaded = -1;
                         if (!backdrops[i].loaded)
                         {
@@ -206,6 +207,9 @@ bool skin_backdrops_preload(void)
                             backdrops[i].buflib_handle = -1;
                             retval = false;
                         }
+                        else
+                            core_shrink(backdrops[i].buflib_handle,
+                                        (void**)&backdrops[i].buffer, size);
                     }
                     else
                         backdrops[i].loaded = true;
@@ -283,12 +287,19 @@ void skin_backdrop_load_setting(void)
                     if (backdrops[i].buflib_handle <= 0)
                         return;
                 }
+                int size;
                 bool loaded;
                 backdrops[i].buffer = core_get_data(backdrops[i].buflib_handle);
                 handle_being_loaded = backdrops[i].buflib_handle;
-                loaded = screens[SCREEN_MAIN].backdrop_load(
+                size = screens[SCREEN_MAIN].backdrop_load(
                                                    global_settings.backdrop_file,
                                                    backdrops[i].buffer);
+                loaded = size > 0;
+                if (loaded)
+                {
+                    core_shrink(backdrops[i].buflib_handle,
+                                        (void**)&backdrops[i].buffer, size);
+                }
                 handle_being_loaded = -1;
                 backdrops[i].name[2] = loaded ? '.' : '\0';
                 backdrops[i].loaded = loaded;

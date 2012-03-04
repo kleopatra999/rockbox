@@ -27,7 +27,7 @@
 #endif
 #include "backdrop.h"
 
-bool backdrop_load(const char* filename, char *backdrop_buffer)
+int backdrop_load(const char* filename, char *backdrop_buffer)
 {
     struct bitmap bm;
     int ret;
@@ -37,8 +37,9 @@ bool backdrop_load(const char* filename, char *backdrop_buffer)
     ret = read_bmp_file(filename, &bm, LCD_BACKDROP_BYTES,
                         FORMAT_NATIVE | FORMAT_DITHER, NULL);
 
-    return ((ret > 0)
-            && (bm.width == LCD_WIDTH) && (bm.height == LCD_HEIGHT));
+    if ((ret > 0) && (bm.width >= LCD_WIDTH) && (bm.height >= LCD_HEIGHT))
+        return ret;
+    return -1;
 }
   
   
@@ -52,7 +53,7 @@ void backdrop_show(char *backdrop_buffer)
 
 #if LCD_REMOTE_DEPTH > 1
 /* api functions */
-bool remote_backdrop_load(const char *filename, char* backdrop_buffer)
+int remote_backdrop_load(const char *filename, char* backdrop_buffer)
 {
     struct bitmap bm;
     int ret;
@@ -61,8 +62,10 @@ bool remote_backdrop_load(const char *filename, char* backdrop_buffer)
     bm.data = backdrop_buffer;
     ret = read_bmp_file(filename, &bm, REMOTE_LCD_BACKDROP_BYTES,
                         FORMAT_NATIVE | FORMAT_DITHER | FORMAT_REMOTE, NULL);
-    return ((ret > 0)
-            && (bm.width == LCD_REMOTE_WIDTH) && (bm.height == LCD_REMOTE_HEIGHT));
+    if ((ret > 0)
+            && (bm.width == LCD_REMOTE_WIDTH) && (bm.height == LCD_REMOTE_HEIGHT))
+        return ret;
+    return -1;
 }
 
 void remote_backdrop_show(char *backdrop_buffer)
