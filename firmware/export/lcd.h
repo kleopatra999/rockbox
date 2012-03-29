@@ -391,14 +391,23 @@ extern fb_data *lcd_framebuffer;
 #define FBADDR(x, y) (lcd_framebuffer + ((y) * LCD_FBWIDTH) + (x))
 #endif
 
-#ifdef HAVE_DYNAMIC_LCD_SIZE
+#ifndef HAVE_DYNAMIC_LCD_SIZE
+extern fb_data lcd_static_framebuffer[LCD_FBHEIGHT][LCD_FBWIDTH];
+#define FRAMEBUFFER_SIZE (sizeof(lcd_static_framebuffer))
+#else
 extern fb_data *lcd_framebuffer, *lcd_static_framebuffer;
 extern int lcd_width;
 extern int lcd_height;
 #define FRAMEBUFFER_SIZE (lcd_width*lcd_height*sizeof(fb_data))
-#else
-extern fb_data lcd_static_framebuffer[LCD_FBHEIGHT][LCD_FBWIDTH];
-#define FRAMEBUFFER_SIZE (sizeof(lcd_static_framebuffer))
+
+/* to be called by the app layer when it consumes the SYS_LCD_CHANGED event */
+void lcd_change_size(int width, int height);
+/* to be called by the display driver upon resize event/interrupt */
+void lcd_changed_handler(int width, int height);
+/* called by the generic lcd code once the resize event has been synchronized
+ * to the Rockbox UI thread and it recreated the frame buffer (at the end of
+ * lcd_change_size()) */
+void lcd_changed_ack(const fb_data* fb, int width, int height);
 #endif
 
 /** Port-specific functions. Enable in port config file. **/

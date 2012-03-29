@@ -89,16 +89,6 @@ static void connect_with_java(JNIEnv* env, jobject fb_instance)
  */
 void lcd_init_device(void)
 {
-#ifdef HAVE_DYNAMIC_LCD_SIZE
-    jmethodID getResolution = (*env_ptr)->GetMethodID(env_ptr, RockboxService_class, "getResolution", "()[I");
-    jintArray resolution = (jintArray) (*env_ptr)->CallObjectMethod(env_ptr, RockboxService_instance, getResolution);
-    jint *resolutionElements = (*env_ptr)->GetIntArrayElements(env_ptr, resolution, NULL);
-
-    lcd_width = resolutionElements[0];
-    lcd_height = resolutionElements[1];
-    (*env_ptr)->ReleaseIntArrayElements(env_ptr, resolution, resolutionElements, 0);
-    lcd_static_framebuffer = malloc(sizeof(fb_data) * lcd_width * lcd_height);
-#endif
 }
 
 void lcd_update(void)
@@ -174,6 +164,25 @@ Java_org_rockbox_RockboxFramebuffer_surfaceDestroyed(JNIEnv *e, jobject this,
 
     (*e)->DeleteGlobalRef(e, RockboxFramebuffer_instance);
     RockboxFramebuffer_instance = NULL;
+}
+
+/*
+ * the surface is changed every time the window changes
+ */
+JNIEXPORT void JNICALL
+Java_org_rockbox_RockboxFramebuffer_surfaceChanged(JNIEnv *env, jobject this,
+                                                jobject surfaceholder, jint format,
+                                                jint width, jint height)
+{
+    (void)this; (void)env; (void)surfaceholder; (void)format;
+    lcd_changed_handler(width, height);
+}
+
+void lcd_changed_ack(const fb_data* fb, int width, int height)
+{
+    (void)fb; (void)width; (void)height;
+    if (display_on)
+        connect_with_java(env_ptr, RockboxFramebuffer_instance);
 }
 
 bool lcd_active(void)

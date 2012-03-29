@@ -676,6 +676,7 @@ int do_menu(const struct menu_item_ex *start_menu, int *start_selected,
                     ret = MENU_ATTACHED_USB;
                     done = true;
                     break;
+                case SYS_LCD_CHANGED:
                 case SYS_CALL_HUNG_UP:
                 case BUTTON_MULTIMEDIA_PLAYPAUSE:
                 /* remove splash from playlist_resume() */

@@ -27,6 +27,9 @@
 
 /* Default display zoom level */
 extern SDL_Surface *gui_surface;
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+extern SDL_Surface *gui_surface_new;
+#endif
 
 void sdl_update_rect(SDL_Surface *surface, int x_start, int y_start, int width,
                      int height, int max_x, int max_y,

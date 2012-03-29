@@ -40,8 +40,8 @@
 
 #define HAVE_DYNAMIC_LCD_SIZE
 /* worst case enough for 1080p */
-#define MAX_LCD_WIDTH  2048
-#define MAX_LCD_HEIGHT 2048
+#define LCD_MAX_WIDTH  2048
+#define LCD_MAX_HEIGHT 2048
 
 /* define this to indicate your device's keypad */
 #define HAVE_TOUCHSCREEN

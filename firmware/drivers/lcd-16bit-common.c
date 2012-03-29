@@ -59,15 +59,61 @@ static struct viewport default_vp =
 
 static struct viewport* current_vp IDATA_ATTR = &default_vp;
 
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+#include <string.h>
+#include "button.h"
+
+
+/* this needs to be called by the app layer once it consumes the SYS_LCD_CHANGED
+ * event */
+void lcd_change_size(int width, int height)
+{
+    fb_data *old_fb = lcd_static_framebuffer;
+    /* register new dimensions */
+    default_vp.width = lcd_width = width;
+    default_vp.height = lcd_height = height;
+    /* swap out frame buffer */
+    size_t new_size = FRAMEBUFFER_SIZE;
+    lcd_static_framebuffer = realloc(lcd_static_framebuffer, new_size);
+    if (lcd_framebuffer == old_fb)
+        lcd_framebuffer = lcd_static_framebuffer;
+    /* refresh backdrop_offset */
+    lcd_set_backdrop(lcd_backdrop);
+    /* ACK for the display driver */
+    lcd_changed_ack(lcd_static_framebuffer, width, height);
+}
+
+void lcd_changed_handler(int width, int height)
+{
+    if (width != lcd_width || height != lcd_height)
+    {
+        /* ensure a frame buffer exists as a measure to ensure that threading
+         * is initialized and queue_post() is safe to call. needed because this
+         * function is possibly called by an IRQ before rockbox is initialized */
+        while(!lcd_static_framebuffer);
+        /* lcd_change_size() needs to be called synchronously with the app layer,
+         * otherwise the app layer will use wrong (old size) viewports when this
+         * code has already switched to the new size */
+        queue_post(&button_queue, SYS_LCD_CHANGED, (width << 16) | (height&0xffff));
+    }
+}
+#endif
+
 /* LCD init */
 void lcd_init(void)
 {
-    /* Call device specific init */
-    lcd_init_device();
-
-    lcd_framebuffer = (fb_data*)lcd_static_framebuffer;
+#ifdef HAVE_DYNAMIC_LCD_SIZE
     default_vp.width = LCD_WIDTH;
     default_vp.height = LCD_HEIGHT;
+    if(!lcd_static_framebuffer)
+        lcd_static_framebuffer = malloc(FRAMEBUFFER_SIZE);
+#else
+    default_vp.width = LCD_WIDTH;
+    default_vp.height = LCD_HEIGHT;
+#endif
+    lcd_framebuffer = (fb_data*)lcd_static_framebuffer;
+    /* Call device specific init */
+    lcd_init_device();
 
     lcd_clear_display();
     scroll_init();

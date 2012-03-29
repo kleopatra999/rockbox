@@ -47,8 +47,6 @@
 
 #endif
 
-SDL_Surface    *gui_surface;
-
 bool            background = true;          /* use backgrounds by default */
 #ifdef HAVE_REMOTE_LCD
 bool            showremote = true;          /* include remote by default */
@@ -60,11 +58,6 @@ bool            lcd_display_redraw = true;  /* Used for player simulator */
 char            having_new_lcd = true;      /* Used for player simulator */
 bool            sim_alarm_wakeup = false;
 const char     *sim_root_dir = NULL;
-
-#ifdef HAVE_DYNAMIC_LCD_SIZE
-int             lcd_width = DEFAULT_LCD_WIDTH;
-int             lcd_height = DEFAULT_LCD_HEIGHT;
-#endif
 
 static SDL_Thread *evt_thread = NULL;
 

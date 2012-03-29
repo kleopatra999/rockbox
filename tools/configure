@@ -123,8 +123,8 @@ app_set_lcd_size () {
     ARG_LCDWIDTH=$app_lcd_width
     ARG_LCDHEIGHT=$app_lcd_height
 
-    app_lcd_width="#define DEFAULT_LCD_WIDTH $app_lcd_width"
-    app_lcd_height="#define DEFAULT_LCD_HEIGHT $app_lcd_height"
+    app_lcd_width="#define LCD_DEFAULT_WIDTH $app_lcd_width"
+    app_lcd_height="#define LCD_DEFAULT_HEIGHT $app_lcd_height"
 }
 
 findarmgcc() {
@@ -3315,7 +3315,7 @@ fi
     target="SDLAPP"
     app_set_paths
     app_set_lcd_size
-    memory=8
+    memory=16
     uname=`uname`
     simcc "sdl-app"
     tool="cp "
@@ -3343,7 +3343,7 @@ fi
     sharedir="/data/data/org.rockbox/app_rockbox/rockbox"
     bindir="/data/data/org.rockbox/lib"
     libdir="/data/data/org.rockbox/app_rockbox"
-    memory=8
+    memory=16
     uname=`uname`
     androidcc armeabi
     tool="cp "

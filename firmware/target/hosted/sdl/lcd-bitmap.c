@@ -29,7 +29,7 @@
 #include "maemo-thread.h"
 #endif
 
-SDL_Surface* lcd_surface;
+static SDL_Surface* lcd_surface;
 
 #if LCD_DEPTH <= 8
 #ifdef HAVE_BACKLIGHT
@@ -115,6 +115,16 @@ static unsigned long get_lcd_pixel(int x, int y)
 #endif
 }
 
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+void lcd_changed_ack(const fb_data *fb, int width, int height)
+{
+    (void)fb;
+    SDL_Surface *cur = SDL_GetVideoSurface();
+    gui_surface = SDL_SetVideoMode(width, height, cur->format->BitsPerPixel, cur->flags);
+    lcd_init_device();
+}
+#endif
+
 void lcd_update(void)
 {
     /* update a full screen rect */
@@ -172,10 +182,6 @@ void sim_backlight(int value)
 /* initialise simulator lcd driver */
 void lcd_init_device(void)
 {
-#ifdef HAVE_DYNAMIC_LCD_SIZE
-    lcd_static_framebuffer = malloc(lcd_width * lcd_height * sizeof(fb_data));
-#endif
-
 #if LCD_DEPTH == 16
     lcd_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
                                        LCD_WIDTH * display_zoom,

@@ -26,6 +26,8 @@
 
 double display_zoom = 1;
 
+SDL_Surface    *gui_surface;
+
 void sdl_update_rect(SDL_Surface *surface, int x_start, int y_start, int width,
                      int height, int max_x, int max_y,
                      unsigned long (*getpixel)(int, int))

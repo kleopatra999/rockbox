@@ -641,6 +641,20 @@ long default_event_handler_ex(long event, void (*callback)(void *), void *parame
             return 0;
         }
 #endif
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+        case SYS_LCD_CHANGED:
+        {
+            /* re-initialize multi screen api, user interface and skin engine.
+             * in this order. */
+            intptr_t data = button_get_data();
+            lcd_change_size(data >> 16, data & 0xffff);
+            screen_init();
+            viewportmanager_theme_changed(0);
+            settings_apply_skins();
+            lcd_update();
+            return SYS_LCD_CHANGED;
+        }
+#endif
 #ifdef HAVE_MULTIMEDIA_KEYS
         /* multimedia keys on keyboards, headsets */
         case BUTTON_MULTIMEDIA_PLAYPAUSE:

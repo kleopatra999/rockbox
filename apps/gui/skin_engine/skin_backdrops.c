@@ -176,6 +176,7 @@ bool skin_backdrops_preload(void)
                 if (!file_exists(filename))
                 {
                     char copy[MAX_PATH];
+                    strcpy(copy, filename);
                     char* temp = backdrops[i].name+2; /* slightly hacky to get a buffer */
                     char *ext = strrchr(copy, '.');
                     size_t size = sizeof(backdrops[i].name) -2;

@@ -136,7 +136,5 @@ public class RockboxFramebuffer extends SurfaceView
 
     public native void surfaceCreated(SurfaceHolder holder);
     public native void surfaceDestroyed(SurfaceHolder holder);
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
-    {
-    }
+    public native void surfaceChanged(SurfaceHolder holder, int format, int width, int height);
 }

@@ -42,8 +42,8 @@
 
 
 #ifdef HAVE_DYNAMIC_LCD_SIZE
-int lcd_width;
-int lcd_height;
+int lcd_width = LCD_DEFAULT_WIDTH;
+int lcd_height = LCD_DEFAULT_HEIGHT;
 #endif
 
 void LCDFN(set_framebuffer)(FBFN(data) *fb)
@@ -84,8 +84,7 @@ void LCDFN(set_viewport)(struct viewport* vp)
     LCDFN(set_foreground)(current_vp->fg_pattern);
     LCDFN(set_background)(current_vp->bg_pattern);
 #endif
-
-#if defined(SIMULATOR)
+#if defined(SIMULATOR) || defined(HAVE_DYNAMIC_LCD_SIZE)
     /* Force the viewport to be within bounds.  If this happens it should
      *  be considered an error - the viewport will not draw as it might be
      *  expected.

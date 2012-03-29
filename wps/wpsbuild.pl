@@ -104,8 +104,16 @@ STOP
     else {
     print GCC <<STOP
 \#include "config.h"
+\#ifdef LCD_DEFAULT_HEIGHT
+Height: LCD_DEFAULT_HEIGHT
+\#else
 Height: LCD_HEIGHT
+\#endif
+\#ifdef LCD_DEFAULT_WIDTH
+Width: LCD_DEFAULT_WIDTH
+\#else
 Width: LCD_WIDTH
+\#endif
 Depth: LCD_DEPTH
 STOP
 ;
