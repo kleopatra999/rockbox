@@ -129,6 +129,9 @@ static int sdl_event_thread(void * param)
     /* Fullscreen mode for maemo app */
     flags |= SDL_FULLSCREEN;
 #endif
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    flags |= SDL_VIDEORESIZE;
+#endif
 
     SDL_WM_SetCaption(UI_TITLE, NULL);
 
@@ -328,7 +331,7 @@ void sys_handle_argv(int argc, char *argv[])
                     display_zoom=atof(argv[x]);
                 else
                     display_zoom = 2;
-                printf("Window zoom is %d\n", display_zoom);
+                printf("Window zoom is %.2f\n", display_zoom);
             }
             else if (!strcmp("--alarm", argv[x]))
             {

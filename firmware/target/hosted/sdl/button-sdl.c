@@ -22,6 +22,7 @@
 #include <math.h>
 #include <stdlib.h>         /* EXIT_SUCCESS */
 #include "sim-ui-defines.h"
+#include "lcd-sdl.h"
 #include "lcd-charcells.h"
 #ifdef HAVE_REMOTE_LCD
 #include "lcd-remote.h"
@@ -283,6 +284,12 @@ static bool event_handler(SDL_Event *event)
     case SDL_USEREVENT:
         return true;
         break;
+#ifdef HAVE_DYNAMIC_LCD_SIZE
+    case SDL_VIDEORESIZE:
+        /* NOTE: SDL 1.2.15 has a bug where this event is not always received */
+        lcd_changed_handler(event->resize.w / display_zoom, event->resize.h / display_zoom);
+        break;
+#endif
     }
 
     return false;

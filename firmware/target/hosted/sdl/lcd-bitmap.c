@@ -120,6 +120,8 @@ void lcd_changed_ack(const fb_data *fb, int width, int height)
 {
     (void)fb;
     SDL_Surface *cur = SDL_GetVideoSurface();
+    width *= display_zoom;
+    height *= display_zoom;
     gui_surface = SDL_SetVideoMode(width, height, cur->format->BitsPerPixel, cur->flags);
     lcd_init_device();
 }
