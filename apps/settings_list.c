@@ -862,7 +862,13 @@ const struct settings_list settings[] = {
                     ID2P(LANG_INVERT_CURSOR_BAR)),
  #endif
     CHOICE_SETTING(F_THEMESETTING|F_TEMPVAR, statusbar,
-                  LANG_STATUS_BAR, STATUSBAR_TOP, "statusbar","off,top,bottom",
+                  LANG_STATUS_BAR,
+#ifdef ANDROID
+                  STATUSBAR_OFF,
+#else
+                  STATUSBAR_TOP,
+#endif
+                  "statusbar","off,top,bottom",
                   NULL, 3, ID2P(LANG_OFF), ID2P(LANG_STATUSBAR_TOP),
                   ID2P(LANG_STATUSBAR_BOTTOM)),
 #ifdef HAVE_REMOTE_LCD

@@ -200,7 +200,7 @@ viewers iconset.96x96x16:    icons/tango_icons_viewers.8x8.bmp
 viewers iconset..+x2:        icons/tango_small_viewers_mono.bmp
 
 show icons: on
-statusbar: top
+statusbar: off
 ui viewport: -
 </main>
 
@@ -208,7 +208,7 @@ ui viewport: -
 rwps.128x96x2: cabbiev2.128x96x2.wps
 rwps.128x64x1: cabbiev2.128x64x1.wps
 Font.128x64x1: 08-Rockfont.fnt
-statusbar: top
+statusbar: off
 ui viewport: -
 </remote>
 

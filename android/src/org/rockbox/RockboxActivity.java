@@ -40,8 +40,8 @@ public class RockboxActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                             WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //~ getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                             //~ WindowManager.LayoutParams.FLAG_FULLSCREEN);
         Intent intent = new Intent(this, RockboxService.class);
         intent.setAction(Intent.ACTION_MAIN);
         intent.putExtra("callback", new ResultReceiver(new Handler(getMainLooper())) {
@@ -137,5 +137,25 @@ public class RockboxActivity extends Activity
     {
         super.onDestroy();
         setServiceActivity(false);
+    }
+
+    private void _enableStatusbar(boolean on)
+    {
+        int param = on ? WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN:
+                         WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        int mask = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN|
+                   WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        getWindow().setFlags(param, mask);
+    }
+
+    public void enableStatusbar(final boolean on)
+    {
+        runOnUiThread(new Runnable()
+        {   @Override
+            public void run()
+            {
+                _enableStatusbar(on);
+            }
+        });
     }
 }

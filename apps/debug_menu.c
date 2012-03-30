@@ -2178,6 +2178,29 @@ static bool dbg_isp1583(void)
 }
 #endif
 
+#ifdef ANDROID
+#include <jni.h>
+static bool dbg_android_bars(void)
+{
+    extern JNIEnv *env_ptr;
+    extern jclass  RockboxService_class;
+    extern jobject RockboxService_instance;
+    extern JNIEnv *env_ptr;
+    static bool enabled = true;
+    splash(0, "bar toggled");
+    enabled = !enabled;
+    jfieldID activityf = (*env_ptr)->GetFieldID(env_ptr, RockboxService_class,
+                                                "current_activity",
+                                                "Landroid/app/Activity;");
+    jobject activity = (*env_ptr)->GetObjectField(env_ptr, RockboxService_instance, activityf);
+    jclass  activity_class = (*env_ptr)->GetObjectClass(env_ptr, activity);
+    jmethodID enablebar = (*env_ptr)->GetMethodID(env_ptr, activity_class,
+                                                 "enableStatusbar", "(Z)V");
+    (*env_ptr)->CallVoidMethod(env_ptr, activity, enablebar, (jboolean)enabled);
+    return false;
+}
+#endif
+
 #if defined(CREATIVE_ZVx) && !defined(SIMULATOR)
 extern int pic_dbg_num_items(void);
 extern const char* pic_dbg_item(int selected_item, void *data,
@@ -2368,6 +2391,9 @@ static const struct {
 #if (defined(HAVE_WHEEL_ACCELERATION) && (CONFIG_KEYPAD==IPOD_4G_PAD) \
      && !defined(IPOD_MINI) && !defined(SIMULATOR))
         {"Debug scrollwheel", dbg_scrollwheel },
+#endif
+#ifdef ANDROID
+        { "toggle android bars", dbg_android_bars },
 #endif
 };
 
