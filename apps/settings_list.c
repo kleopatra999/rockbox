@@ -72,7 +72,8 @@
 #define BOOL(a) {.bool_ = a}
 #define CHARPTR(a) {.charptr = a}
 #define UCHARPTR(a) {.ucharptr = a}
-#define FUNCTYPE(a) {.func = a}
+#define INT_FUNC(a) {.int_func = a}
+#define CHARPTR_FUNC(a) {.charptr_func = a}
 #define NODEFAULT INT(0)
 
 /* in all the following macros the args are:
@@ -127,6 +128,13 @@
 #define TEXT_SETTING(flags,var,name,default,prefix,suffix)      \
             {flags|F_T_UCHARPTR, &global_settings.var,-1,           \
                 CHARPTR(default),name,NULL,                         \
+                {.filename_setting=                                 \
+                    (struct filename_setting[]){                    \
+                        {prefix,suffix,sizeof(global_settings.var)}}} }
+
+#define TEXT_FUNC_SETTING(flags,var,name,default,prefix,suffix)     \
+            {flags|F_DEF_ISFUNC|F_T_UCHARPTR, &global_settings.var,-1, \
+                CHARPTR_FUNC(default),name,NULL,                    \
                 {.filename_setting=                                 \
                     (struct filename_setting[]){                    \
                         {prefix,suffix,sizeof(global_settings.var)}}} }
@@ -207,76 +215,104 @@ static const char graphic_numeric[] = "graphic,numeric";
 #define DEFAULT_SBSNAME  "-"
 #define DEFAULT_FMS_NAME "cabbiev2"
 
-#if defined(HAVE_LCD_BITMAP) && !defined(HAVE_DYNAMIC_LCD_SIZE)
+#if defined(HAVE_LCD_BITMAP)
 
-#if LCD_HEIGHT <= 64
-  #define DEFAULT_FONT_HEIGHT 8
-  #define DEFAULT_FONTNAME "08-Rockfont"
-#elif LCD_HEIGHT <= 80
-  #define DEFAULT_FONT_HEIGHT 11
-  #define DEFAULT_FONTNAME "11-Sazanami-Mincho"
-#elif (LCD_HEIGHT == 96) && (LCD_WIDTH == 96)   /* sandisk sansa clip zip */
-  #define DEFAULT_FONT_HEIGHT 8
-  #define DEFAULT_FONTNAME "08-Rockfont"
-#elif LCD_HEIGHT <= 220
-  #define DEFAULT_FONT_HEIGHT 12
-#elif LCD_HEIGHT <= 320
-  #define DEFAULT_FONT_HEIGHT 15
-#elif LCD_HEIGHT <= 400
-  #define DEFAULT_FONT_HEIGHT 16
-#elif LCD_HEIGHT <= 480 && LCD_WIDTH < 800
-  #define DEFAULT_FONT_HEIGHT 27
-#else
-  #define DEFAULT_FONT_HEIGHT 35
-#endif
+/* inline since it's compile time constant on !HAVE_DYNAMIC_LCD_SIZE */
+static inline int default_fontheight(void)
+{
+    int h;
 
-#else
-  #define DEFAULT_FONT_HEIGHT 27
+    if (LCD_HEIGHT <= 64)
+        h = 8;
+    else if (LCD_HEIGHT == 96 && LCD_WIDTH == 96)   /* sandisk sansa clip zip */
+        h = 8;
+    else if (LCD_HEIGHT <= 80)
+        h = 11;
+    else if (LCD_HEIGHT <= 220)
+        h = 12;
+    else if (LCD_HEIGHT <= 320)
+        h = 15;
+    else if (LCD_HEIGHT <= 400)
+        h = 16;
+    else if (LCD_HEIGHT <= 480 && LCD_WIDTH < 800)
+        h = 27;
+    else
+        h = 35;
+
+    return h;
+}
+
+static char* default_fontname(void)
+{
+    int height = default_fontheight();
+    if (height == 8)
+        return "08-Rockfont";
+    else if (height == 11)
+        return "11-Sazanami-Mincho";
+    else
+    {
+        static char buf[sizeof("XX-Adobe-Helvetica")];
+        sprintf(buf, "%d-Adobe-Helvetica", height);
+        return buf;
+    }
+}
+
+static char* default_iconset(void)
+{
+#ifdef HAVE_LCD_COLOR
+    int height = default_fontheight();
+    if (height >= 31)
+        return "tango_icons.32x32";
+    else if (height >= 23)
+        return "tango_icons.24x24";
+    else if (height >= 15)
+        return "tango_icons.16x16";
+    else if (height >= 11)
+        return "tango_icons.12x12";
+    else
+        return "tango_icons.8x8";
+#elif LCD_DEPTH > 1 /* greyscale */
+    return "tango_small_mono";
+#else /* monochrome */
+    return "";
 #endif
+}
+
+static char* default_viewer_iconset(void)
+{
+#ifdef HAVE_LCD_COLOR
+    int height = default_fontheight();
+    if (height >= 31)
+        return "tango_icons_viewers.32x32";
+    else if (height >= 23)
+        return "tango_icons_viewers.24x24";
+    else if (height >= 15)
+        return "tango_icons_viewers.16x16";
+    else if (height >= 11)
+        return "tango_icons_viewers.12x12";
+    else
+        return "tango_icons_viewers.8x8";
+#elif LCD_DEPTH > 1 /* greyscale */
+    return  "tango_small_viewers_mono";
+#else /* monochrome */
+    return "";
+#endif
+}
+
+#ifdef HAVE_REMOTE_LCD
+
+static char* default_remote_fontname(void)
+{
+    if (LCD_REMOTE_HEIGHT <= 64)
+        return "08-Rockfont";
+    return "-";
+}
+
+#endif /* HAVE_REMOTE_LCD */
 
 #define DEFAULT_GLYPHS 250
 #define MIN_GLYPHS 50
 #define MAX_GLYPHS 65540
-
-#ifndef DEFAULT_FONTNAME
-/* ugly expansion needed */
-#define _EXPAND2(x) #x
-#define _EXPAND(x) _EXPAND2(x)
-#define DEFAULT_FONTNAME _EXPAND(DEFAULT_FONT_HEIGHT) "-Adobe-Helvetica"
-#endif
-
-#ifdef HAVE_LCD_COLOR
-  #if DEFAULT_FONT_HEIGHT >= 31
-    #define DEFAULT_ICONSET "tango_icons.32x32"
-    #define DEFAULT_VIEWERS_ICONSET "tango_icons_viewers.32x32"
-  #elif DEFAULT_FONT_HEIGHT >= 23
-    #define DEFAULT_ICONSET "tango_icons.24x24"
-    #define DEFAULT_VIEWERS_ICONSET "tango_icons_viewers.24x24"
-  #elif DEFAULT_FONT_HEIGHT >= 15
-    #define DEFAULT_ICONSET "tango_icons.16x16"
-    #define DEFAULT_VIEWERS_ICONSET "tango_icons_viewers.16x16"
-  #elif DEFAULT_FONT_HEIGHT >= 11
-    #define DEFAULT_ICONSET "tango_icons.12x12"
-    #define DEFAULT_VIEWERS_ICONSET "tango_icons_viewers.12x12"
-  #elif DEFAULT_FONT_HEIGHT >= 7
-    #define DEFAULT_ICONSET "tango_icons.8x8"
-    #define DEFAULT_VIEWERS_ICONSET "tango_icons_viewers.8x8"
-  #endif
-#elif LCD_DEPTH > 1 /* greyscale */
-  #define DEFAULT_ICONSET "tango_small_mono"
-  #define DEFAULT_VIEWERS_ICONSET "tango_small_viewers_mono"
-#else /* monochrome */
-  #define DEFAULT_ICONSET ""
-  #define DEFAULT_VIEWERS_ICONSET ""
-#endif
-
-#ifdef HAVE_REMOTE_LCD
-#if LCD_REMOTE_HEIGHT <= 64
-  #define DEFAULT_REMOTE_FONTNAME "08-Rockfont"
-#else
-  #define DEFAULT_REMOTE_FONTNAME "-"
-#endif
-#endif /* HAVE_REMOTE_LCD */
 
 #define DEFAULT_THEME_FOREGROUND LCD_RGBPACK(0xce, 0xcf, 0xce)
 #define DEFAULT_THEME_BACKGROUND LCD_RGBPACK(0x00, 0x00, 0x00)
@@ -285,6 +321,8 @@ static const char graphic_numeric[] = "graphic,numeric";
 #define DEFAULT_THEME_SELECTOR_TEXT LCD_RGBPACK(0x00, 0x00, 0x00)
 
 #define DEFAULT_BACKDROP    BACKDROP_DIR "/cabbiev2.bmp"
+
+#endif /* HAVE_LCD_BITMAP */
 
 #ifdef HAVE_RECORDING
 /* these should be in the config.h files */
@@ -818,7 +856,7 @@ const struct settings_list settings[] = {
 #ifdef HAVE_LCD_CONTRAST
     /* its easier to leave this one un-macro()ed for the time being */
     { F_T_INT|F_DEF_ISFUNC|F_INT_SETTING, &global_settings.contrast,
-        LANG_CONTRAST, FUNCTYPE(lcd_default_contrast), "contrast", NULL , {
+        LANG_CONTRAST, INT_FUNC(lcd_default_contrast), "contrast", NULL , {
             .int_setting = (struct int_setting[]) {
                 { lcd_set_contrast, UNIT_INT, MIN_CONTRAST_SETTING,
                   MAX_CONTRAST_SETTING, 1, NULL, NULL }}}},
@@ -942,7 +980,7 @@ const struct settings_list settings[] = {
 #if defined(IPOD_VIDEO) && !defined(SIMULATOR)
     /* its easier to leave this one un-macro()ed for the time being */
     { F_T_INT|F_DEF_ISFUNC|F_INT_SETTING, &global_settings.battery_capacity,
-        LANG_BATTERY_CAPACITY, FUNCTYPE(battery_default_capacity),
+        LANG_BATTERY_CAPACITY, INT_FUNC(battery_default_capacity),
         "battery capacity", NULL , {
             .int_setting = (struct int_setting[]) {
                 { set_battery_capacity, UNIT_MAH, BATTERY_CAPACITY_MIN,
@@ -1809,15 +1847,15 @@ const struct settings_list settings[] = {
 #endif
 #endif /* CONFIG_TUNER */
 #ifdef HAVE_LCD_BITMAP
-    TEXT_SETTING(F_THEMESETTING, font_file, "font",
-                     DEFAULT_FONTNAME, FONT_DIR "/", ".fnt"),
+    TEXT_FUNC_SETTING(F_THEMESETTING, font_file, "font",
+                     default_fontname, FONT_DIR "/", ".fnt"),
     INT_SETTING(0, glyphs_to_cache, LANG_GLYPHS, DEFAULT_GLYPHS,
                 "glyphs", UNIT_INT, MIN_GLYPHS, MAX_GLYPHS, 10,
                 NULL, NULL, NULL),
 #endif
 #ifdef HAVE_REMOTE_LCD
-    TEXT_SETTING(F_THEMESETTING, remote_font_file, "remote font",
-                     DEFAULT_REMOTE_FONTNAME, FONT_DIR "/", ".fnt"),
+    TEXT_FUNC_SETTING(F_THEMESETTING, remote_font_file, "remote font",
+                     default_remote_fontname, FONT_DIR "/", ".fnt"),
 #endif
     TEXT_SETTING(F_THEMESETTING,wps_file, "wps",
                      DEFAULT_WPSNAME, WPS_DIR "/", ".wps"),
@@ -1908,11 +1946,10 @@ const struct settings_list settings[] = {
 
     /* Customizable icons */
 #ifdef HAVE_LCD_BITMAP
-    TEXT_SETTING(F_THEMESETTING, icon_file, "iconset", DEFAULT_ICONSET,
-                     ICON_DIR "/", ".bmp"),
-    TEXT_SETTING(F_THEMESETTING, viewers_icon_file, "viewers iconset",
-                     DEFAULT_VIEWERS_ICONSET,
-                     ICON_DIR "/", ".bmp"),
+    TEXT_FUNC_SETTING(F_THEMESETTING, icon_file, "iconset",
+                     default_iconset, ICON_DIR "/", ".bmp"),
+    TEXT_FUNC_SETTING(F_THEMESETTING, viewers_icon_file, "viewers iconset",
+                     default_viewer_iconset, ICON_DIR "/", ".bmp"),
 #endif
 #ifdef HAVE_REMOTE_LCD
     TEXT_SETTING(F_THEMESETTING, remote_icon_file, "remote iconset", "-",

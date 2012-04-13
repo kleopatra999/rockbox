@@ -513,7 +513,7 @@ static bool is_changed(int setting_id)
     case F_T_UINT:
         if (setting->flags&F_DEF_ISFUNC)
         {
-            if (*(int*)setting->setting == setting->default_val.func())
+            if (*(int*)setting->setting == setting->default_val.int_func())
                 return false;
         }
         else if (setting->flags&F_T_SOUND)
@@ -531,8 +531,16 @@ static bool is_changed(int setting_id)
         break;
     case F_T_CHARPTR:
     case F_T_UCHARPTR:
-        if (!strcmp((char*)setting->setting, setting->default_val.charptr))
-            return false;
+        if (setting->flags&F_DEF_ISFUNC)
+        {
+            if (!strcmp((char*)setting->setting, setting->default_val.charptr_func()))
+                return false;
+        }
+        else
+        {
+            if (!strcmp((char*)setting->setting, setting->default_val.charptr))
+                return false;
+        }
         break;
     }
     return true;
@@ -1094,7 +1102,7 @@ void reset_setting(const struct settings_list *setting, void *var)
     case F_T_INT:
     case F_T_UINT:
         if (setting->flags&F_DEF_ISFUNC)
-            *(int*)var = setting->default_val.func();
+            *(int*)var = setting->default_val.int_func();
         else if (setting->flags&F_T_SOUND)
             *(int*)var = sound_default(setting->sound_setting->setting);
         else *(int*)var = setting->default_val.int_;
@@ -1104,8 +1112,12 @@ void reset_setting(const struct settings_list *setting, void *var)
         break;
     case F_T_CHARPTR:
     case F_T_UCHARPTR:
-        strlcpy((char*)var, setting->default_val.charptr,
-                setting->filename_setting->max_len);
+        if (setting->flags&F_DEF_ISFUNC)
+            strlcpy((char*)var, setting->default_val.charptr_func(),
+                    setting->filename_setting->max_len);
+        else
+            strlcpy((char*)var, setting->default_val.charptr,
+                    setting->filename_setting->max_len);
         break;
     }
 }

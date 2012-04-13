@@ -26,16 +26,16 @@
 #include <limits.h>
 #include "inttypes.h"
 
-typedef int (*_isfunc_type)(void);
-
 union storage_type {
     int int_;
     unsigned int uint_;
     bool bool_;
     char *charptr;
     unsigned char *ucharptr;
-    _isfunc_type func;
     void* custom;
+
+    int (*int_func)(void);
+    char* (*charptr_func)(void);
 };
 /* the variable type for the setting */
 #define F_T_INT      1
