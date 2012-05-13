@@ -1,0 +1,140 @@
+# cabbie 2.0
+# (C) 2007, Johannes Voggenthaler (Zinc Alloy)
+# (C) 2012, Thomas Martitz ported to 768x1024 touchscreens
+# derived from "cabbie" (C) Yohann Misquitta
+
+# TODO:
+#  * images for battery, hold button
+%wd
+%X(wpsbackdrop-768x1024x16.bmp)
+
+%xl(D,shuffle-768x1024x16.bmp,380,130,2)
+%xl(E,repeat-768x1024x16.bmp,540,105,5)
+%xl(F,playmode-768x1024x16.bmp,0,0,5)
+%xl(G,popup-768x1024x16.bmp,0,0)
+%xl(pb,pb-768x1024x16.bmp,0,0)
+%xl(pbbd,pbbackground-768x1024x16.bmp,0,0)
+%xl(vol,volumebar-768x1024x16.bmp,0,0)
+%xl(volbd,volumebar-backdrop-768x1024x16.bmp,0,0)
+%xl(vols,volume-768x1024x16.bmp,0,0)
+%xl(volsbd,volume-bg-768x1024x16.bmp,0,0)
+
+#
+# static top now playing bar image
+#
+%x(foo,nowplayingbar-768x1024x16.bmp,54,32)
+%xd(foo)
+
+%Cl(0,0,400,400,c,c)
+%?C<%Vd(c)|%Vd(a)>
+%?vg(show_vol)<%?C<%Vd(d)|%Vd(b)>|%Vd(t)|%Vd(vol)>
+
+#
+# track & next track info - no AA
+#
+%Vl(a,0,112,-,400,-)
+# tap on current title info for playlist (ie. where albumart would normally be)
+%T(110,0,400,400,playlist)
+
+%s%ac%?it<%it|%fn>
+%s%ac%?ia<%ia|%?d(2)<%d(2)|%(root%)>>
+%s%ac%?id<%id|%?d(1)<%d(1)|%(root%)>>
+%ac%?iy<%iy|>
+%Vl(b,0,-450,-,180,-)
+%ac%?ig<%ig|>
+%ac%?fv<%(vbr%) |>%fb kbit/s %fc
+%s%ac%?Ia<%Ia|%?D(2)<%D(2)|%(root%)>>
+%ac%Sx(Next Track:)
+%ac%s%?It<%It|%Fn>
+
+#
+# album art viewport
+#
+%Vl(c,184,112,400,400,-)
+# tap on the cover art for playlist
+%T(0,0,400,400,playlist)
+%Cd
+
+#
+# current track info - AA
+#
+%Vl(d,0,530,-,-300,-)
+%s%ac%?it<%it|%fn>
+%s%ac%?ia<%ia|%?d(2)<%d(2)|%(root%)>>
+%s%ac%?id<%id|%?d(1)<%d(1)|%(root%)>>
+
+#
+# next track info - AA
+#
+%Vl(d,0,-290,-,40,-)
+%?C<%s%ac%Sx(Next:) %?Ia<%Ia|%?D(2)<%D(2)|%(root%)>> - %?It<%It|%Fn>|%s%ac%?Id<%Id|%?D(1)<%D(1)|%(root%)>>>
+
+#
+# progressbar (viewport also for following items)
+#
+%V(0,-240,-,-,-)
+%pb(54,6,660,48,image,pb,backdrop,pbbd)
+%T(54,0,660,60,progressbar)
+
+#
+# small volume
+#
+%pv(230,110,128,88,image,vols,backdrop,volsbd)
+%T(small_vol,230,110,128,88,none)
+
+#
+# shuffle
+#
+%xd(D, %ps)
+%T(380,125,130,70,shuffle)
+
+#
+# repeat
+#
+%xd(E, %mm, 0)
+%T(530,105,85,112,repmode)
+
+#
+# playmode
+#
+%V(-120,-120,100,-,-)
+%?Tp<%?mp<%xd(F, 1)|%xd(F, 3)|%xd(F, 2)|%xd(F, 4)|%xd(F, 5)||||>|%xd(F, %mp)>
+%T(0,0,100,110,play)
+%T(0,0,100,110,stop, repeat_press)
+
+#
+# ff/rewind button
+#
+%V(20,-120,100,-,-)
+%xd(F,5)
+%T(0,0,100,110,rwd, repeat_press)
+%T(0,0,100,110,prev)
+%V(125,-120,100,-,-)
+%xd(F,4)
+%T(0,0,100,110,ffwd, repeat_press)
+%T(0,0,100,110,next)
+
+#
+# volume slider
+#
+%Vl(vol,134,525,500,217,-)
+%pv(0,0,500,217,image,vol,backdrop,volbd)
+%T(0,0,500,217,volume)
+
+#
+# popup osd menu
+#
+%Vl(t,134,525,500,217,-)
+%xd(G)
+%T(30,22,160,150,browse)
+%T(195,22,145,150,quickscreen)
+%T(345,22,125,150,contextmenu)
+
+#
+# playtime
+#
+%V(25,-170,-25,36,-)
+%pc%ac%?Sr<%pe %Sx(of) %pp|%pp %Sx(of) %pe>%ar%pr
+
+# needs to be within an unconditional viewport (even 0,0,0,0 would suffice)
+%?Tl(small_vol,2.0)<%vs(show_vol,set,3)|%?mv(2.0)<%vs(show_vol,set,3)|%?Tl<%vs(show_vol,set,2)|%vs(show_vol,set,1)>>>

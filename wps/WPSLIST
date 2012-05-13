@@ -79,6 +79,7 @@ RSBS: no
 <main>
 
 # override implicit .wps filename
+wps.768x1024x16: cabbiev2.768x1024x16.wps
 wps.800x480x16:  cabbiev2.800x480x16.wps
 wps.480x800x16:  cabbiev2.480x800x16.wps
 wps.400x240x16:  cabbiev2.400x240x16.wps
@@ -107,6 +108,7 @@ fms.160x128x2:   cabbiev2-160x128x2.fms
 fms.128x128x2:   cabbiev2-128x128x2.fms
 
 # Preferred font (including .fnt extension - leave blank for player):
+Font.768x1024x16: 35-Adobe-Helvetica.fnt
 Font.800x480x16: 35-Adobe-Helvetica.fnt
 Font.480x800x16: 35-Adobe-Helvetica.fnt
 Font.400x240x16: 15-Adobe-Helvetica.fnt
@@ -139,6 +141,7 @@ line selector text color: 000000
 filetype colours: -
 
 #backdrop - remember this is the source file name in your SVN folder, not dest name!
+backdrop.768x1024x16: backdrops/cabbiev2.768x1024x16.bmp
 backdrop.800x480x16:  backdrops/cabbiev2.800x480x16.bmp
 backdrop.480x800x16:  backdrops/cabbiev2.480x800x16.bmp
 backdrop.400x240x16:  backdrops/cabbiev2.400x240x16.bmp
@@ -164,6 +167,7 @@ selector type..+x16: bar (gradient)
 selector type..+x2: bar (inverse)
 
 #icons
+iconset.768x1024x16: icons/tango_icons.32x32.bmp
 iconset.800x480x16:  icons/tango_icons.32x32.bmp
 iconset.480x800x16:  icons/tango_icons.32x32.bmp
 iconset.400x240x16:  icons/tango_icons.16x16.bmp
@@ -182,6 +186,7 @@ iconset.96x96x16:    icons/tango_icons.8x8.bmp
 iconset..+x2:        icons/tango_small_mono.bmp
 
 #viewer icons
+viewers iconset.768x1024x16: icons/tango_icons_viewers.32x32.bmp
 viewers iconset.800x480x16:  icons/tango_icons_viewers.32x32.bmp
 viewers iconset.480x800x16:  icons/tango_icons_viewers.32x32.bmp
 viewers iconset.400x240x16:  icons/tango_icons_viewers.16x16.bmp
