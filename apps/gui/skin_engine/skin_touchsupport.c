@@ -34,6 +34,7 @@
 #include "playlist.h"
 #include "dsp_misc.h"
 
+
 /** Disarms all touchregions. */
 void skin_disarm_touchregions(struct wps_data *data)
 {

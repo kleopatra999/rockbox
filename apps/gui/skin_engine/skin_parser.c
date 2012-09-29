@@ -369,16 +369,64 @@ static int parse_image_display(struct skin_element *element,
             id->subimage = 0;
         }
     }
+    id->vp = PTRTOSKINOFFSET(skin_buffer, &curr_vp->vp);
     token->value.data = PTRTOSKINOFFSET(skin_buffer, id);
     return 0;
+}
+
+static void param_to_image_align_horiz(const char* param, struct image_align *align)
+{
+    bool swap_for_rtl = lang_is_rtl() && follow_lang_direction;
+
+    switch (param[0])
+    {
+        case 'l':
+        case 'L':
+            if (swap_for_rtl)
+                align->xalign = WPS_ALBUMART_ALIGN_RIGHT;
+            else
+                align->xalign = WPS_ALBUMART_ALIGN_LEFT;
+            break;
+        case 'c':
+        case 'C':
+            align->xalign = WPS_ALBUMART_ALIGN_CENTER;
+            break;
+        case 'r':
+        case 'R':
+            if (swap_for_rtl)
+                align->xalign = WPS_ALBUMART_ALIGN_LEFT;
+            else
+                align->xalign = WPS_ALBUMART_ALIGN_RIGHT;
+            break;
+    }
+}
+
+static void param_to_image_align_vert(const char* param, struct image_align *align)
+{
+    switch (param[0])
+    {
+        case 't':
+        case 'T':
+            align->yalign = WPS_ALBUMART_ALIGN_TOP;
+            break;
+        case 'c':
+        case 'C':
+            align->yalign = WPS_ALBUMART_ALIGN_CENTER;
+            break;
+        case 'b':
+        case 'B':
+            align->yalign = WPS_ALBUMART_ALIGN_BOTTOM;
+            break;
+    }
 }
 
 static int parse_image_load(struct skin_element *element,
                             struct wps_token *token,
                             struct wps_data *wps_data)
 {
-    const char* filename;
-    const char* id;
+    const char *filename;
+    const char *id;
+    const char *xalign_text = NULL, *yalign_text = NULL;
     int x = 0,y = 0, subimages = 1;
     struct gui_img *img;
 
@@ -398,8 +446,21 @@ static int parse_image_load(struct skin_element *element,
         subimages = get_param(element, 2)->data.number;
     else if (element->params_count > 3)
     {
-        x = get_param(element, 2)->data.number;
-        y = get_param(element, 3)->data.number;
+        struct skin_tag_parameter *xparam, *yparam;
+
+        xparam = get_param(element, 2);
+        yparam = get_param(element, 3);
+
+        if (xparam->type == STRING)
+            xalign_text = get_param_text(element, 2);
+        else
+            x = xparam->data.number;
+
+        if (yparam->type == STRING)
+            yalign_text = get_param_text(element, 3);
+        else
+            y = yparam->data.number;
+
         if (element->params_count == 5)
             subimages = get_param(element, 4)->data.number;
     }
@@ -422,6 +483,8 @@ static int parse_image_load(struct skin_element *element,
     img->using_preloaded_icons = false;
     img->buflib_handle = -1;
     img->is_9_segment = false;
+    img->alignment.xalign = 0;
+    img->alignment.yalign = 0;
 
     /* save current viewport */
     img->vp = PTRTOSKINOFFSET(skin_buffer, &curr_vp->vp);
@@ -434,6 +497,12 @@ static int parse_image_load(struct skin_element *element,
         img->num_subimages = Icon_Last_Themeable;
         img->using_preloaded_icons = true;
     }
+
+    if (xalign_text)
+        param_to_image_align_horiz(xalign_text, &img->alignment);
+
+    if (yalign_text)
+        param_to_image_align_vert(yalign_text, &img->alignment);
 
     struct skin_token_list *item = new_skin_token_list_item(NULL, img);
     if (!item)
@@ -891,6 +960,7 @@ static int parse_progressbar_tag(struct skin_element* element,
     struct skin_tag_parameter *param = get_param(element, 0);
     int curr_param = 0;
     char *image_filename = NULL;
+    struct image_align pb_align;
 #ifdef HAVE_TOUCHSCREEN
     bool suppress_touchregion = false;
 #endif
@@ -914,6 +984,7 @@ static int parse_progressbar_tag(struct skin_element* element,
     pb->setting_id = -1;
     pb->invert_fill_direction = false;
     pb->horizontal = true;
+    pb_align.xalign = pb_align.yalign = WPS_ALBUMART_ALIGN_NONE;
 
     if (element->params_count == 0)
     {
@@ -927,13 +998,23 @@ static int parse_progressbar_tag(struct skin_element* element,
 
     /* (x, y, width, height, ...) */
     if (!isdefault(param))
-        pb->x = param->data.number;
+    {
+        if (param->type == STRING)
+            param_to_image_align_horiz(get_param_text(element, 0), &pb_align);
+        else
+            pb->x = param->data.number;
+    }
     else
         pb->x = 0;
     param++;
 
     if (!isdefault(param))
-        pb->y = param->data.number;
+    {
+        if (param->type == STRING)
+            param_to_image_align_vert(get_param_text(element, 1), &pb_align);
+        else
+            pb->y = param->data.number;
+    }
     else
         pb->y = -1; /* computed at rendering */
     param++;
@@ -990,11 +1071,15 @@ static int parse_progressbar_tag(struct skin_element* element,
         {
             if (curr_param+1 < element->params_count)
             {
+                struct gui_img *slider_img;
                 curr_param++;
                 param++;
                 text = SKINOFFSETTOPTR(skin_buffer, param->data.text);
-                pb->slider = PTRTOSKINOFFSET(skin_buffer,
-                        skin_find_item(text, SKIN_FIND_IMAGE, wps_data));
+                slider_img = skin_find_item(text, SKIN_FIND_IMAGE, wps_data);
+                /* inherit alignment from bar, not image declaration */
+                slider_img->alignment = pb_align;
+                slider_img->vp = pb->vp;
+                pb->slider = PTRTOSKINOFFSET(skin_buffer, slider_img);
             }
             else /* option needs the next param */
                 return -1;
@@ -1014,11 +1099,15 @@ static int parse_progressbar_tag(struct skin_element* element,
         {
             if (curr_param+1 < element->params_count)
             {
+                struct gui_img *bd_img;
                 curr_param++;
                 param++;
                 text = SKINOFFSETTOPTR(skin_buffer, param->data.text);
-                pb->backdrop = PTRTOSKINOFFSET(skin_buffer,
-                        skin_find_item(text, SKIN_FIND_IMAGE, wps_data));
+                bd_img = skin_find_item(text, SKIN_FIND_IMAGE, wps_data);
+                /* inherit alignment from bar, not image declaration */
+                bd_img->alignment = pb_align;
+                bd_img->vp = pb->vp;
+                pb->backdrop = PTRTOSKINOFFSET(skin_buffer, bd_img);
 
             }
             else /* option needs the next param */
@@ -1059,9 +1148,10 @@ static int parse_progressbar_tag(struct skin_element* element,
     {
         pb->image = PTRTOSKINOFFSET(skin_buffer,
                 skin_find_item(image_filename, SKIN_FIND_IMAGE, wps_data));
-        if (!SKINOFFSETTOPTR(skin_buffer, pb->image)) /* load later */
+        struct gui_img *img = SKINOFFSETTOPTR(skin_buffer, pb->image);
+        if (!img) /* load later */
         {
-            struct gui_img *img = skin_buffer_alloc(sizeof(*img));
+            img = skin_buffer_alloc(sizeof(*img));
             if (!img)
                 return WPS_ERROR_INVALID_PARAM;
             /* save a pointer to the filename */
@@ -1073,13 +1163,15 @@ static int parse_progressbar_tag(struct skin_element* element,
             img->display = -1;
             img->using_preloaded_icons = false;
             img->buflib_handle = -1;
-            img->vp = PTRTOSKINOFFSET(skin_buffer, &curr_vp->vp);
             struct skin_token_list *item = new_skin_token_list_item(NULL, img);
             if (!item)
                 return WPS_ERROR_INVALID_PARAM;
             add_to_ll_chain(&wps_data->images, item);
             pb->image = PTRTOSKINOFFSET(skin_buffer, img);
         }
+        /* inherit alignment from bar, not image declaration */
+        img->alignment = pb_align;
+        img->vp = pb->vp;
     }
 
     if (token->type == SKIN_TOKEN_VOLUME)
@@ -1097,6 +1189,24 @@ static int parse_progressbar_tag(struct skin_element* element,
     else if (token->type == SKIN_TOKEN_SETTING)
 		token->type = SKIN_TOKEN_SETTINGBAR;
     pb->type = token->type;
+
+    if (pb_align.xalign != WPS_ALBUMART_ALIGN_NONE)
+    {
+        if (pb_align.xalign & WPS_ALBUMART_ALIGN_CENTER)
+            pb->x = (vp->width - pb->width) / 2;
+        else if (pb_align.xalign & WPS_ALBUMART_ALIGN_RIGHT)
+            pb->x = (vp->width - pb->width) - pb->x;
+    }
+
+    /* FIXME: If height == -1 then alignment doesnt work (font height not
+     * known here). Does anybody use both at the same time? */
+    if (pb_align.yalign != WPS_ALBUMART_ALIGN_NONE && pb->height > 0)
+    {
+        if (pb_align.yalign & WPS_ALBUMART_ALIGN_CENTER)
+            pb->y = (vp->height - pb->height) / 2;
+        else if (pb_align.yalign & WPS_ALBUMART_ALIGN_BOTTOM)
+            pb->y = (vp->height - pb->height) - pb->y;
+    }
 
 #ifdef HAVE_TOUCHSCREEN
     if (!suppress_touchregion &&
@@ -1181,18 +1291,31 @@ static int parse_albumart_load(struct skin_element* element,
     int albumart_slot;
     bool swap_for_rtl = lang_is_rtl() && follow_lang_direction;
     struct skin_albumart *aa = skin_buffer_alloc(sizeof(*aa));
+    struct skin_tag_parameter *xparam, *yparam;
     (void)token; /* silence warning */
     if (!aa)
         return -1;
 
     /* reset albumart info in wps */
+    aa->x = aa->y = 0;
     aa->width = -1;
     aa->height = -1;
-    aa->xalign = WPS_ALBUMART_ALIGN_CENTER; /* default */
-    aa->yalign = WPS_ALBUMART_ALIGN_CENTER; /* default */
+    aa->alignment_in_aa.xalign = WPS_ALBUMART_ALIGN_CENTER; /* default */
+    aa->alignment_in_aa.yalign = WPS_ALBUMART_ALIGN_CENTER; /* default */
 
-    aa->x = get_param(element, 0)->data.number;
-    aa->y = get_param(element, 1)->data.number;
+    xparam = get_param(element, 0);
+    yparam = get_param(element, 1);
+
+    if (xparam->type == STRING)
+    {
+        param_to_image_align_horiz(get_param_text(element, 0), &aa->alignment_in_vp);
+        param_to_image_align_vert(get_param_text(element, 1), &aa->alignment_in_vp);
+    }
+    else
+    {
+        aa->x = xparam->data.number;
+        aa->y = yparam->data.number;
+    }
     aa->width = get_param(element, 2)->data.number;
     aa->height = get_param(element, 3)->data.number;
 
@@ -1221,47 +1344,11 @@ static int parse_albumart_load(struct skin_element* element,
         wps_data->playback_aa_slot = albumart_slot;
 
     if (element->params_count > 4 && !isdefault(get_param(element, 4)))
-    {
-        switch (*get_param_text(element, 4))
-        {
-            case 'l':
-            case 'L':
-                if (swap_for_rtl)
-                    aa->xalign = WPS_ALBUMART_ALIGN_RIGHT;
-                else
-                    aa->xalign = WPS_ALBUMART_ALIGN_LEFT;
-                break;
-            case 'c':
-            case 'C':
-                aa->xalign = WPS_ALBUMART_ALIGN_CENTER;
-                break;
-            case 'r':
-            case 'R':
-                if (swap_for_rtl)
-                    aa->xalign = WPS_ALBUMART_ALIGN_LEFT;
-                else
-                    aa->xalign = WPS_ALBUMART_ALIGN_RIGHT;
-                break;
-        }
-    }
+        param_to_image_align_horiz(get_param_text(element, 4), &aa->alignment_in_aa);
+
     if (element->params_count > 5 && !isdefault(get_param(element, 5)))
-    {
-        switch (*get_param_text(element, 5))
-        {
-            case 't':
-            case 'T':
-                aa->yalign = WPS_ALBUMART_ALIGN_TOP;
-                break;
-            case 'c':
-            case 'C':
-                aa->yalign = WPS_ALBUMART_ALIGN_CENTER;
-                break;
-            case 'b':
-            case 'B':
-                aa->yalign = WPS_ALBUMART_ALIGN_BOTTOM;
-                break;
-        }
-    }
+        param_to_image_align_vert(get_param_text(element, 5), &aa->alignment_in_aa);
+
     return 0;
 }
 
@@ -1818,6 +1905,48 @@ static int load_skin_bmp(struct wps_data *wps_data, struct bitmap *bitmap, char*
 #endif
 }
 
+void fix_image_alignments(struct gui_img *img, struct viewport *vp)
+{
+    struct image_align *align = &img->alignment;
+
+    if (align->xalign != WPS_ALBUMART_ALIGN_NONE && img->bm.width < vp->width)
+    {
+        if (align->xalign & WPS_ALBUMART_ALIGN_CENTER)
+            img->x = (vp->width - img->bm.width) / 2;
+        else if (align->xalign & WPS_ALBUMART_ALIGN_RIGHT)
+            img->x = (vp->width - img->bm.width);
+        else if (align->xalign & WPS_ALBUMART_ALIGN_LEFT)
+            img->x = 0;
+    }
+
+    if (align->yalign != WPS_ALBUMART_ALIGN_NONE && img->bm.height < vp->height)
+    {
+        if (align->yalign & WPS_ALBUMART_ALIGN_CENTER)
+            img->y = (vp->height - img->bm.height) / 2;
+        else if (align->yalign & WPS_ALBUMART_ALIGN_BOTTOM)
+            img->y = (vp->height - img->bm.height);
+        else if (align->yalign & WPS_ALBUMART_ALIGN_TOP)
+            img->y = 0;
+    }
+}
+
+static void fix_aa_alignments(struct skin_albumart *aa, struct viewport *vp)
+{
+    struct gui_img img = {
+        .x = aa->x,
+        .y = aa->y,
+        .alignment = aa->alignment_in_vp,
+        .bm = {
+            .width = aa->width,
+            .height = aa->height
+        }
+    };
+    fix_image_alignments(&img, vp);
+    aa->x = img.x;
+    aa->y = img.y;
+    /* width, height and alignment are unchanged */
+}
+
 static bool load_skin_bitmaps(struct wps_data *wps_data, char *bmpdir)
 {
     struct skin_token_list *list;
@@ -1828,7 +1957,8 @@ static bool load_skin_bitmaps(struct wps_data *wps_data, char *bmpdir)
     while (list)
     {
         struct wps_token *token = SKINOFFSETTOPTR(skin_buffer, list->token);
-        struct gui_img *img = (struct gui_img*)SKINOFFSETTOPTR(skin_buffer, token->value.data);
+        struct gui_img *img = SKINOFFSETTOPTR(skin_buffer, token->value.data);
+        struct viewport *vp = SKINOFFSETTOPTR(skin_buffer, img->vp);
         if (img->bm.data)
         {
             if (img->using_preloaded_icons)
@@ -1845,6 +1975,8 @@ static bool load_skin_bitmaps(struct wps_data *wps_data, char *bmpdir)
                 else
                     retval = false;
             }
+            if (img->loaded)
+                fix_image_alignments(img, vp);
         }
         list = SKINOFFSETTOPTR(skin_buffer, list->next);
     }
@@ -2231,6 +2363,7 @@ static int skin_element_callback(struct skin_element* element, void* data)
                     {
                         struct skin_albumart *aa = SKINOFFSETTOPTR(skin_buffer, wps_data->albumart);
                         aa->vp = PTRTOSKINOFFSET(skin_buffer, &curr_vp->vp);
+                        fix_aa_alignments(aa, &curr_vp->vp);
                     }
                     break;
                 case SKIN_TOKEN_ALBUMART_LOAD:

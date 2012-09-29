@@ -81,6 +81,11 @@ struct skin_token_list {
 };
 
 #ifdef HAVE_LCD_BITMAP
+struct image_align {
+    unsigned char xalign; /* WPS_ALBUMART_ALIGN_LEFT, _CENTER, _RIGHT */
+    unsigned char yalign; /* WPS_ALBUMART_ALIGN_TOP, _CENTER, _BOTTOM */
+};
+
 struct gui_img {
     OFFSETTYPE(struct viewport*) vp;    /* The viewport to display this image in */
     short int x;                  /* x-pos */
@@ -94,6 +99,7 @@ struct gui_img {
     int display;
     bool using_preloaded_icons; /* using the icon system instead of a bmp */
     bool is_9_segment;
+    struct image_align alignment;
 };
 
 struct image_display {
@@ -101,6 +107,7 @@ struct image_display {
     int subimage;
     OFFSETTYPE(struct wps_token*) token; /* the token to get the subimage number from */
     int offset; /* offset into the bitmap strip to start */
+    OFFSETTYPE(struct viewport *) vp; /* the viewport the image is displayed in */
 };
 
 struct progressbar {
@@ -255,6 +262,7 @@ struct playlistviewer {
 #define WPS_ALBUMART_CHECK          1      /* WPS contains AA conditional tag */
 #define WPS_ALBUMART_LOAD           2      /* WPS contains AA tag */
 
+#define WPS_ALBUMART_ALIGN_NONE     0    /* x/y align: no align */
 #define WPS_ALBUMART_ALIGN_RIGHT    1    /* x align:   right */
 #define WPS_ALBUMART_ALIGN_CENTER   2    /* x/y align: center */
 #define WPS_ALBUMART_ALIGN_LEFT     4    /* x align:   left */
@@ -268,8 +276,8 @@ struct skin_albumart {
     int width;
     int height;
 
-    unsigned char xalign; /* WPS_ALBUMART_ALIGN_LEFT, _CENTER, _RIGHT */
-    unsigned char yalign; /* WPS_ALBUMART_ALIGN_TOP, _CENTER, _BOTTOM */
+    struct image_align alignment_in_vp; /* align the aa area within the vp */
+    struct image_align alignment_in_aa; /* align smaller image within aa area */
     unsigned char state; /* WPS_ALBUMART_NONE, _CHECK, _LOAD */
     
     OFFSETTYPE(struct viewport *) vp;

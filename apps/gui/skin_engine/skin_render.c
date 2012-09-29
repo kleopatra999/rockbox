@@ -254,8 +254,13 @@ static bool do_non_text_tags(struct gui_wps *gwps, struct skin_draw_info *info,
             struct image_display *id = SKINOFFSETTOPTR(skin_buffer, token->value.data);
             const char* label = SKINOFFSETTOPTR(skin_buffer, id->label);
             struct gui_img *img = skin_find_item(label,SKIN_FIND_IMAGE, data);
+            struct viewport *vp = SKINOFFSETTOPTR(skin_buffer, id->vp);
             if (img && img->loaded)
             {
+                /* the image can be displayed in multiple viewports,
+                 * so the alignment flags need to be reevaluated */
+                void fix_image_alignments(struct gui_img *img, struct viewport *vp);
+                fix_image_alignments(img, vp);
                 if (SKINOFFSETTOPTR(skin_buffer, id->token) == NULL)
                 {
                     img->display = id->subimage;

@@ -325,9 +325,9 @@ void draw_album_art(struct gui_wps *gwps, int handle_id, bool clear)
         width = MIN(bmp->width, aa->width);
 
         /* Align */
-        if (aa->xalign & WPS_ALBUMART_ALIGN_RIGHT)
+        if (aa->alignment_in_aa.xalign & WPS_ALBUMART_ALIGN_RIGHT)
             x += aa->width - width;
-        else if (aa->xalign & WPS_ALBUMART_ALIGN_CENTER)
+        else if (aa->alignment_in_aa.xalign & WPS_ALBUMART_ALIGN_CENTER)
             x += (aa->width - width) / 2;
     }
 
@@ -337,9 +337,9 @@ void draw_album_art(struct gui_wps *gwps, int handle_id, bool clear)
         height = MIN(bmp->height, aa->height);
 
         /* Align */
-        if (aa->yalign & WPS_ALBUMART_ALIGN_BOTTOM)
+        if (aa->alignment_in_aa.yalign & WPS_ALBUMART_ALIGN_BOTTOM)
             y += aa->height - height;
-        else if (aa->yalign & WPS_ALBUMART_ALIGN_CENTER)
+        else if (aa->alignment_in_aa.yalign & WPS_ALBUMART_ALIGN_CENTER)
             y += (aa->height - height) / 2;
     }
 

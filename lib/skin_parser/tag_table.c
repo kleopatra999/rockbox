@@ -22,7 +22,7 @@
 #include "tag_table.h"
 
 #include <string.h>
-#define BAR_PARAMS "?iiii|s*"
+#define BAR_PARAMS "?[iS][iS]ii|s*"
 /* The tag definition table */
 static const struct tag_info legal_tags[] = 
 {
@@ -176,13 +176,13 @@ static const struct tag_info legal_tags[] =
     { SKIN_TOKEN_DISABLE_THEME,         "wd", "", 0|NOBREAK },
     { SKIN_TOKEN_DRAW_INBUILTBAR,       "wi", "", SKIN_REFRESH_STATIC|NOBREAK },
     
-    { SKIN_TOKEN_IMAGE_PRELOAD,         "xl", "SF|III", 0|NOBREAK },
+    { SKIN_TOKEN_IMAGE_PRELOAD,         "xl", "SF|[SI][SI]I", 0|NOBREAK },
     { SKIN_TOKEN_IMAGE_PRELOAD_DISPLAY, "xd", "S|[IT]I", 0 },
-    { SKIN_TOKEN_IMAGE_DISPLAY,         "x", "SF|II", SKIN_REFRESH_STATIC|NOBREAK },
+    { SKIN_TOKEN_IMAGE_DISPLAY,         "x", "SF|[SI][SI]", SKIN_REFRESH_STATIC|NOBREAK },
     { SKIN_TOKEN_IMAGE_DISPLAY_9SEGMENT, "x9", "S", 0 },
     
     { SKIN_TOKEN_LOAD_FONT,             "Fl" , "IF|I", 0|NOBREAK },
-    { SKIN_TOKEN_ALBUMART_LOAD,         "Cl" , "IIII|ss", 0|NOBREAK },
+    { SKIN_TOKEN_ALBUMART_LOAD,         "Cl" , "[SI][SI]II|ss", 0|NOBREAK },
     { SKIN_TOKEN_ALBUMART_DISPLAY,      "Cd" , "", SKIN_REFRESH_STATIC },
     { SKIN_TOKEN_ALBUMART_FOUND,        "C" , "", SKIN_REFRESH_STATIC },
     
