@@ -79,7 +79,8 @@ RSBS: no
 <main>
 
 # override implicit .wps filename
-wps.[0-9]+x1[0-9]{3}x16: cabbiev2.800x1280x16.wps
+wps.800+x1[0-9]{3}x16: cabbiev2.800x1280x16.wps
+wps.720+x1[0-9]{3}x16: cabbiev2.720x1280x16.wps
 wps.768x1024x16: cabbiev2.768x1024x16.wps
 wps.800x480x16:  cabbiev2.800x480x16.wps
 wps.480x800x16:  cabbiev2.480x800x16.wps
@@ -142,7 +143,8 @@ line selector text color: 000000
 filetype colours: -
 
 #backdrop - remember this is the source file name in your SVN folder, not dest name!
-backdrop.[78][0-9][0-9]x1280x16: backdrops/cabbiev2.800x1280x16.bmp
+backdrop.8[0-9][0-9]x1280x16: backdrops/cabbiev2.800x1280x16.bmp
+backdrop.720x1280x16: backdrops/cabbiev2.720x1280x16.bmp
 backdrop.768x1024x16: backdrops/cabbiev2.768x1024x16.bmp
 backdrop.800x480x16:  backdrops/cabbiev2.800x480x16.bmp
 backdrop.480x800x16:  backdrops/cabbiev2.480x800x16.bmp
