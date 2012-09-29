@@ -326,16 +326,13 @@ void wps_display_images(struct gui_wps *gwps, struct viewport* vp)
     {
         struct wps_token *token = SKINOFFSETTOPTR(get_skin_buffer(data), list->token);
         struct gui_img *img = (struct gui_img*)SKINOFFSETTOPTR(get_skin_buffer(data), token->value.data);
-        if (img->using_preloaded_icons && img->display >= 0)
+
+        if (img->display >= 0)
         {
-            screen_put_icon(display, img->x, img->y, img->display);
-        }
-        else if (img->loaded)
-        {
-            if (img->display >= 0)
-            {
+            if (img->using_preloaded_icons)
+                screen_put_icon(display, img->x, img->y, img->display);
+            else if (img->loaded)
                 wps_draw_image(gwps, img, img->display, vp);
-            }
         }
         list = SKINOFFSETTOPTR(get_skin_buffer(data), list->next);
     }

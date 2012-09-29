@@ -1242,15 +1242,15 @@ static int parse_progressbar_tag(struct skin_element* element,
         if (region->x < 0)
             region->x = 0;
         region->width = pb->width + 2 * wpad;
-        if (region->x + region->width > curr_vp->vp.x + curr_vp->vp.width)
-            region->width = curr_vp->vp.x + curr_vp->vp.width - region->x;
+        if (region->x + region->width > vp->x + vp->width)
+            region->width = vp->x + vp->width - region->x;
 
         region->y = pb->y - hpad;
         if (region->y < 0)
             region->y = 0;
         region->height = pb->height + 2 * hpad;
-        if (region->y + region->height > curr_vp->vp.y + curr_vp->vp.height)
-            region->height = curr_vp->vp.y + curr_vp->vp.height - region->y;
+        if (region->y + region->height > vp->y + vp->height)
+            region->height = vp->y + vp->height - region->y;
 
         region->wvp = PTRTOSKINOFFSET(skin_buffer, curr_vp);
         region->reverse_bar = false;
