@@ -1504,10 +1504,11 @@ static int parse_touchregion(struct skin_element *element,
     {
         region->label = PTRTOSKINOFFSET(skin_buffer, get_param_text(element, 0));
         p = 1;
-        /* "[SI]III[SI]|SS" is the param list. There MUST be 4 numbers
-         * followed by at least one string. Verify that here */
+        /* "[SI]Iii[Si]|SS" is the param list. There MUST be 4 numbers (though
+         * the last two can be '-') followed by at least one string.
+         * Verify that here*/
         if (element->params_count < 6 ||
-            get_param(element, 4)->type != INTEGER)
+            (get_param(element, 4)->type != INTEGER && !isdefault(get_param(element, 4))))
             return WPS_ERROR_INVALID_PARAM;
     }
     else
@@ -1517,10 +1518,26 @@ static int parse_touchregion(struct skin_element *element,
     }
 
     region->x = get_param(element, p++)->data.number;
+
+    /* for backward compatibility: parser allows 3rd param to be default.
+     * only allowed for width (and height) so reject if this is y */
+    if (isdefault(get_param(element, p)))
+        return WPS_ERROR_INVALID_PARAM;
     region->y = get_param(element, p++)->data.number;
-    region->width = get_param(element, p++)->data.number;
-    region->height = get_param(element, p++)->data.number;
     region->wvp = PTRTOSKINOFFSET(skin_buffer, curr_vp);
+
+    if (isdefault(get_param(element, p)))
+        region->width = curr_vp->vp.width - region->x;
+    else
+        region->width = get_param(element, p)->data.number;
+    p++;
+
+    if (isdefault(get_param(element, p)))
+        region->height = curr_vp->vp.height - region->y;
+    else
+        region->height = get_param(element, p)->data.number;
+    p++;
+
     region->armed = false;
     region->reverse_bar = false;
     region->value = 0;
