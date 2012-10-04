@@ -738,10 +738,11 @@ buflib_alloc_maximum(struct buflib_context* ctx, const char* name, size_t *size,
  * must be within the original allocation
  */
 bool
-buflib_shrink(struct buflib_context* ctx, int handle, void* new_start, size_t new_size)
+buflib_shrink(struct buflib_context* ctx, int handle, void** new_start, size_t new_size)
 {
+    /* we never make a new allocation */
     char* oldstart = buflib_get_data(ctx, handle);
-    char* newstart = new_start;
+    char* newstart = *new_start;
     char* newend = newstart + new_size;
 
     /* newstart must be higher and new_size not "negative" */
@@ -849,45 +850,21 @@ void buflib_print_allocs(struct buflib_context *ctx,
 void buflib_print_blocks(struct buflib_context *ctx,
                                         void (*print)(int, const char*))
 {
-    char buf[128];
-    int i = 0;
-    for(union buflib_data* this = ctx->buf_start;
-                           this < ctx->alloc_end;
-                           this += abs(this->val))
-    {
-        snprintf(buf, sizeof(buf), "%8p: val: %4ld (%s)",
-                                this, this->val,
-                                this->val > 0? this[3].name:"<unallocated>");
-        print(i++, buf);
-    }
+    /* TODO */
 }
 #endif
 
 #ifdef BUFLIB_DEBUG_BLOCK_SINGLE
 int buflib_get_num_blocks(struct buflib_context *ctx)
 {
-    int i = 0;
-    for(union buflib_data* this = ctx->buf_start;
-                           this < ctx->alloc_end;
-                           this += abs(this->val))
-    {
-        i++;
-    }
-    return i;
+    /* TODO */
+    return -1;
 }
 
 void buflib_print_block_at(struct buflib_context *ctx, int block_num,
                                 char* buf, size_t bufsize)
 {
-    union buflib_data* this = ctx->buf_start;
-    while(block_num > 0 && this < ctx->alloc_end)
-    {
-        this += abs(this->val);
-        block_num -= 1;
-    }
-    snprintf(buf, bufsize, "%8p: val: %4ld (%s)",
-                            this, (long)this->val,
-                            this->val > 0? this[3].name:"<unallocated>");
+    /* TODO */
 }
 
 #endif
