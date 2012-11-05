@@ -22,7 +22,7 @@
 #
 # static top now playing bar image
 #
-%x(foo,nowplayingbar-768x1024x16.bmp,54,32)
+%x(foo,nowplayingbar-768x1024x16.bmp,c,32)
 %xd(foo)
 
 %Cl(0,0,400,400,c,c)
