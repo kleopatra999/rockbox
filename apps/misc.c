@@ -635,17 +635,13 @@ long default_event_handler_ex(long event, void (*callback)(void *), void *parame
 #if (CONFIG_PLATFORM & PLATFORM_HOSTED) && defined(PLATFORM_HAS_VOLUME_CHANGE)
         case SYS_VOLUME_CHANGED:
         {
-            static bool firstvolume = true;
             /* kludge: since this events go to the button_queue,
              * event data is available in the last button data */
             int volume = button_get_data();
             DEBUGF("SYS_VOLUME_CHANGED: %d\n", volume);
             if (global_settings.volume != volume) {
                 global_settings.volume = volume;
-                if (firstvolume) {
-                    setvol();
-                    firstvolume = false;
-                }
+                setvol();
             }
             return 0;
         }

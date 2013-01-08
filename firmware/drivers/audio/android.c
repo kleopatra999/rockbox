@@ -23,7 +23,9 @@
 #include "config.h"
 #include "audiohw.h"
 
-const struct sound_settings_info audiohw_settings[] = {
+/* cannot be const, since default of SOUND_VOLUME is changed at runtime.
+ * to avoid gcc errors make it const but force it into .data section */
+const struct sound_settings_info audiohw_settings[] DATA_ATTR = {
     [SOUND_VOLUME]        = {"dB", 0,  1, VOLUME_MIN / 10, VOLUME_MAX / 10, -25},
 /* Bass and treble tone controls */
 #ifdef AUDIOHW_HAVE_BASS
@@ -48,6 +50,12 @@ const struct sound_settings_info audiohw_settings[] = {
 #endif
 };
 
+
+void audiohw_android_set_default(int which, short value)
+{
+    struct sound_settings_info *table = (struct sound_settings_info *)audiohw_settings;
+    table[which].defaultval = value;
+}
 
 void audiohw_set_volume(int volume)
 {

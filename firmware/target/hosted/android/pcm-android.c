@@ -27,6 +27,7 @@
 #include "debug.h"
 #include "pcm.h"
 #include "pcm-internal.h"
+#include "audiohw.h"
 
 extern JNIEnv *env_ptr;
 
@@ -232,6 +233,8 @@ Java_org_rockbox_RockboxPCM_postVolumeChangedEvent(JNIEnv *env,
 {
     (void) env;
     (void) this;
+    void audiohw_android_set_default(int which, short value);
+    audiohw_android_set_default(SOUND_VOLUME, (short) volume);
     /* for the main queue, the volume will be available through
      * button_get_data() */
     queue_broadcast(SYS_VOLUME_CHANGED, volume);

@@ -547,7 +547,10 @@ static bool settings_write_config(const char* filename, int options)
         if (settings[i].cfg_name == NULL)
             continue;
         value[0] = '\0';
-        
+#ifdef PLATFORM_HAS_VOLUME_CHANGE
+        if (settings[i].setting == &global_settings.volume)
+            continue;
+#endif
         switch (options)
         {
             case SETTINGS_SAVE_CHANGED:
@@ -730,9 +733,9 @@ void sound_settings_apply(void)
     sound_set(SOUND_TREBLE, global_settings.treble);
 #endif
     sound_set(SOUND_BALANCE, global_settings.balance);
-#ifndef PLATFORM_HAS_VOLUME_CHANGE
+//~ #ifndef PLATFORM_HAS_VOLUME_CHANGE
     sound_set(SOUND_VOLUME, global_settings.volume);
-#endif
+//~ #endif
     sound_set(SOUND_CHANNELS, global_settings.channel_config);
     sound_set(SOUND_STEREO_WIDTH, global_settings.stereo_width);
 #if (CONFIG_CODEC == MAS3587F) || (CONFIG_CODEC == MAS3539F)
