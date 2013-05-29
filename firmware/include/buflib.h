@@ -193,8 +193,10 @@ int buflib_alloc_ex(struct buflib_context *ctx, size_t size, const char *name,
  * will allow buflib to permit allocations by shrinking the buffer returned by
  * this function.
  *
- * Note that this currently gives whatever buflib_available() returns. However,
- * do not depend on this behavior, it may change.
+ * Note that this might return many more bytes than buflib_available() or
+ * buflib_allocatable() return, because it agressively compacts the pool
+ * and even shrinks other allocations. However, do not depend on this behavior,
+ * it may change.
  *
  * name: A string identifier giving this allocation a name
  * size: The actual size will be returned into size
