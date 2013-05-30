@@ -836,15 +836,24 @@ static int shrink_callback(int handle, unsigned hints, void* start, size_t old_s
         /* codec messages */
         { Q_AUDIO_PLAY, Q_AUDIO_PLAY },
     };
+    bool give_up = false;
     /* filebuflen is, at this point, the buffering.c buffer size,
      * i.e. the audiobuf except voice, scratch mem, pcm, ... */
     ssize_t extradata_size = old_size - filebuflen;
     /* check what buflib requests */
     size_t wanted_size = (hints & BUFLIB_SHRINK_SIZE_MASK);
     ssize_t size = (ssize_t)old_size - wanted_size;
-    /* keep at least 256K for the buffering */
+
     if ((size - extradata_size) < AUDIO_BUFFER_RESERVE)
-        return BUFLIB_CB_CANNOT_SHRINK;
+    {
+        /* check if buflib needs the memory really hard. if yes we give
+         * up playback for now, otherwise refuse to shrink to keep at least
+         * 256K for the buffering */
+        if ((hints & BUFLIB_SHRINK_POS_MASK) == BUFLIB_SHRINK_POS_MASK)
+            give_up = true;
+        else
+            return BUFLIB_CB_CANNOT_SHRINK;
+    }
 
 
     /* TODO: Do it without stopping playback, if possible */
@@ -877,8 +886,14 @@ static int shrink_callback(int handle, unsigned hints, void* start, size_t old_s
 #ifdef PLAYBACK_VOICE
     voice_stop();
 #endif
-    /* we should be free to change the buffer now
-     * set final buffer size before calling audio_reset_buffer_noalloc()
+
+    /* we should be free to change the buffer now */
+    if (give_up)
+    {
+        audiobuf_handle = core_free(audiobuf_handle);
+        return BUFLIB_CB_OK;
+    }
+    /* set final buffer size before calling audio_reset_buffer_noalloc()
      * (now it's the total size, the call will subtract voice etc) */
     filebuflen = size;
     switch (hints & BUFLIB_SHRINK_POS_MASK)
