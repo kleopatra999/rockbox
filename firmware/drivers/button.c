@@ -61,7 +61,7 @@ static bool phones_present = false;
 #endif
 
 /* how long until repeat kicks in, in centiseconds */
-#define REPEAT_START      (30*HZ/100)
+#define REPEAT_START      (60*HZ/100)
 
 #ifndef HAVE_TOUCHSCREEN
 /* the next two make repeat "accelerate", which is nice for lists

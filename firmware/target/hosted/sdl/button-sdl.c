@@ -465,7 +465,92 @@ int button_read_device(void)
     return btn;
 }
 
+static void init_libcec(void);
+
 void button_init_device(void)
 {
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+    init_libcec();
 }
+
+
+#include <cecc.h>
+#include <cectypes.h>
+
+/* libcec_configuration constructor */
+extern void _ZN3CEC20libcec_configuration5ClearEv(libcec_configuration *_this);
+
+int keypress(void *data, const cec_keypress key)
+{
+    printf("Key pressed: %d (duration: %d)\n", key.keycode, key.duration);
+    int sdl_keycode;
+    bool released = key.duration > 0;
+    bool mm = false;
+
+    switch (key.keycode)
+    {
+        case CEC_USER_CONTROL_CODE_SELECT: sdl_keycode = SDLK_KP_ENTER; break;
+        case CEC_USER_CONTROL_CODE_UP:     sdl_keycode = SDLK_UP;    break;
+        case CEC_USER_CONTROL_CODE_DOWN:   sdl_keycode = SDLK_DOWN;  break;
+        case CEC_USER_CONTROL_CODE_LEFT:   sdl_keycode = SDLK_LEFT;  break;
+        case CEC_USER_CONTROL_CODE_RIGHT:  sdl_keycode = SDLK_RIGHT; break;
+        case CEC_USER_CONTROL_CODE_EXIT:   sdl_keycode = SDLK_KP7;   break;
+
+        case CEC_USER_CONTROL_CODE_PLAY:   mm = true; sdl_keycode = BUTTON_MULTIMEDIA_PLAYPAUSE; break;
+        case CEC_USER_CONTROL_CODE_STOP:   mm = true; sdl_keycode = BUTTON_MULTIMEDIA_STOP; break;
+        case CEC_USER_CONTROL_CODE_PAUSE:  mm = true; sdl_keycode = BUTTON_MULTIMEDIA_PLAYPAUSE; break;
+
+        default: break;
+    }
+
+    if (mm)
+        queue_post(&button_queue, sdl_keycode, 0);
+    else
+        button_event(sdl_keycode, !released);
+
+    return 0;
+}
+
+
+static void init_libcec(void)
+{
+    static libcec_configuration cfg;
+    static ICECCallbacks callbacks = {
+        .CBCecKeyPress = keypress,
+    };
+    static cec_adapter devices[10];
+    const char *port;
+
+    _ZN3CEC20libcec_configuration5ClearEv(&cfg);
+    cfg.bActivateSource = 0;
+    cfg.callbacks = &callbacks;
+    cfg.clientVersion = CEC_CLIENT_VERSION_CURRENT;
+    cfg.deviceTypes.types[0] = CEC_DEVICE_TYPE_RECORDING_DEVICE;
+
+    strcat(cfg.strDeviceName, "Rockbox");
+
+    if (!cec_initialise(&cfg))
+    {
+        printf("Could not load libcec\n");
+        return;
+    }
+    atexit(cec_destroy);
+
+    cec_init_video_standalone();
+
+    if (!cec_find_adapters(devices, 10, NULL))
+    {
+        printf("Could not find cec adapters\n");
+        return;
+    }
+    
+    /* at least 1 device was found. Use first hit */
+    port = devices[0].comm;
+    if (!cec_open(port, 10000))
+    {
+        printf("Could not open adapter %s\n", port);
+        return;
+    }
+
+    printf("Successfully opened cec adapter %s at %s\n", port, devices[0].path);
+}   
