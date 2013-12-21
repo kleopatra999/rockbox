@@ -1,0 +1,134 @@
+# Cabbie v2.0
+# (C) 2007-2012 The Authors (see /rockbox/wps/AUTHORS)
+# Derived from "cabbie" (C) Yohann Misquitta
+#
+# TODO:
+#  * images for battery, hold button
+%wd
+%X(wpsbackdrop-1920x1200x16.bmp)
+%xl(pb,pb-1920x1200x16.bmp,0,0)
+%xl(pbbd,pbbackground-1920x1200x16.bmp,0,0)
+%xl(logo,logo-1920x1200x16.bmp,30,30)
+%xl(vols,volume-1920x1200x16.bmp,0,0)
+%xl(volsbd,volume-bg-1920x1200x16.bmp,0,0)
+%xl(vol,volumebar-1920x1200x16.bmp,0,0)
+%xl(volbd,volumebar-backdrop-1920x1200x16.bmp,0,0)
+%xl(D,shuffle-1920x1200x16.bmp,665,30,2)
+%xl(F,playmode-768x1024x16.bmp,0,0,5)
+
+#
+# static top now playing bar image
+#
+%x(foo,nowplayingbar-1920x1200x16.bmp,c,45)
+%xd(foo)
+
+%Cl(0,0,480,480,c,c)
+
+%?C<%Vd(c)|%Vd(a)>
+%?vg(show_vol)<%?C<%Vd(d)|%Vd(b)>|%Vd(t)|%Vd(vol)>
+
+# track & next track info - no AA
+%Vl(a,0,79,-,450,-)
+# tap on current title info for playlist (ie. where albumart would normally be)
+%T(0,0,450,450,playlist)
+%Vl(b,0,79,-,450,-)
+%s%ac%?it<%it|%fn>
+%s%ac%?ia<%ia|%?d(2)<%d(2)|%(root%)>>
+%s%ac%?id<%id|%?d(1)<%d(1)|%(root%)>>
+
+%s%ac%Sx(Next Track:)
+%s%ac%?Ia<%Ia|%?D(2)<%D(2)|%(root%)>> - %?It<%It|%Fn>
+
+#
+# album art viewport
+#
+%Vl(c,7.8%,18%,480,480,-)
+# tap on the cover art for playlist
+%T(0,0,480,480,playlist)
+%Cd
+
+# track & next track info - AA
+%Vl(d,38.5%,21%,-,411,-)
+%s%al%?it<%it|%fn>
+%s%al%?ia<%ia|%?d(2)<%d(2)|%(root%)>>
+%s%al%?id<%id|%?d(1)<%d(1)|%(root%)>>
+
+%s%al%Sx(Next Track:)
+%s%al%?Ia<%Ia|%?D(2)<%D(2)|%(root%)>> - %?It<%It|%Fn>
+
+# progressbar and bottom icons
+%V(20,67%,-20,119,-)
+%pb(32,10,1816,88,image,pb,backdrop,pbbd)
+%T(0,0,-,-,progressbar)
+
+# playtime
+%V(50,77.5%,-50,80,-)
+%pc%ac%?Sr<%pe %Sx(of) %pp|%pp %Sx(of) %pe>%ar%pr
+
+# Viewport for the bottom toolbar except playmode
+%V(10,-150,-550,-10,-)
+
+#
+# Rockbox logo
+#
+%xd(logo)
+
+#
+# small volume
+#
+%pv(330,0,160,110,image,vols,backdrop,volsbd)
+%T(small_vol,330,0,160,110,none)
+
+#
+# shuffle
+#
+%?ps<%xd(D,1)|%xd(D,2)>
+%T(665,30,151,140,shuffle)
+
+#
+# repeat
+#
+%xl(E,repeat-768x1024x16.bmp,1100,0,5)
+%xd(E, %mm, 0)
+%T(1100,0,85,112,repmode)
+
+#
+# rwd, playmode, ffwd
+#
+%V(-525,-150,100,-10,-)
+%xd(F,5)
+%T(0,0,100,110,rwd, repeat_press)
+%T(0,0,100,110,prev)
+
+%V(-350,-150,100,-10,-)
+%?Tp<%?mp<%xd(F, 1)|%xd(F, 3)|%xd(F, 2)|%xd(F, 4)|%xd(F, 5)||||>|%xd(F, %mp)>
+%T(0,0,100,110,play)
+%T(0,0,100,110,stop, repeat_press)
+
+%V(-175,-150,100,-10,-)
+%xd(F,4)
+%T(0,0,100,110,ffwd, repeat_press)
+%T(0,0,100,110,next)
+
+#
+# volume slider
+#
+%Vl(vol,800,20%,-,410,-)
+%pv(0,0,943,410,image,vol,backdrop,volbd)
+%T(0,0,943,410,volume)
+
+#
+# popup osd menu
+#
+%Vl(t,800,20%,-,410,-)
+%xl(G,popup-1920x1200x16.bmp,0,0)
+%xd(G)
+%T( 60,60,330,290,browse)
+%T(390,60,260,290,quickscreen)
+%T(650,60,240,290,contextmenu)
+
+
+# needs to be at the end since touch regions need to be declared
+# before %Tl can be used
+%V(0,0,1,1,-)
+%?Tl(small_vol,2.0)<%vs(show_vol,set,3)|%?mv(2.0)<%vs(show_vol,set,3)|%?Tl<%vs(show_vol,set,2)|%vs(show_vol,set,1)>>>
